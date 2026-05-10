@@ -52,6 +52,7 @@ src/
 - `/knowledge` - Monthly knowledge base index
 - `/knowledge/:monthId` - Month-specific curriculum guide, for example `/knowledge/2026-06`
 - `/cuda-kb` - Central CUDA field guide with concepts, workflows, commands, glossary, and official sources
+- `/cuda-kb/mental-model` - Deep CUDA mental-model pillar with CPU/GPU boundary practice and traps
 - `/skill-map` - Interactive readiness skill map
 - `/roadmap` - May 2026 to April 2027 roadmap timeline
 - `/cuda-lab` - CUDA execution visualizer

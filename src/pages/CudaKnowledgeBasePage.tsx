@@ -76,6 +76,11 @@ export function CudaKnowledgeBasePage() {
               <DetailList title="Practice" items={pillar.practice} />
               <DetailList title="Traps" items={pillar.traps} />
               <SourceLinks ids={pillar.sourceIds} />
+              {pillar.deepDivePath ? (
+                <Link className="cuda-kb-deep-link" to={pillar.deepDivePath}>
+                  Open deep page
+                </Link>
+              ) : null}
             </article>
           ))}
         </div>
