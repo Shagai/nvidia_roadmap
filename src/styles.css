@@ -149,15 +149,15 @@ textarea:focus-visible {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.15rem;
   justify-content: center;
 }
 
 .primary-nav a {
   border-radius: 999px;
   color: var(--muted);
-  font-size: 0.9rem;
-  padding: 0.35rem 0.7rem;
+  font-size: 0.84rem;
+  padding: 0.32rem 0.5rem;
   text-decoration: none;
 }
 
@@ -594,6 +594,11 @@ h5 {
   color: var(--muted);
 }
 
+.reference-card small {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .check-list {
   display: grid;
   gap: 0.6rem;
@@ -634,6 +639,164 @@ h5 {
 
 .month-guide-link {
   margin-top: 1rem;
+}
+
+.cuda-kb-track-grid,
+.cuda-kb-workflow-grid,
+.cuda-glossary-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cuda-kb-pillar-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.cuda-kb-track-card,
+.cuda-kb-pillar,
+.cuda-kb-workflow,
+.cuda-glossary-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.cuda-kb-track-card h3,
+.cuda-kb-pillar h3,
+.cuda-kb-workflow h3,
+.cuda-glossary-card h3 {
+  font-size: 1.08rem;
+}
+
+.cuda-kb-track-card p,
+.cuda-kb-workflow > p,
+.cuda-glossary-card p {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  margin-top: 0;
+}
+
+.cuda-kb-track-card ol,
+.cuda-kb-detail-list ul,
+.cuda-kb-detail-list ol {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.cuda-kb-pillar header {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.75rem;
+}
+
+.cuda-kb-pillar header p {
+  color: var(--accent);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 730;
+  margin: 0 0 0.35rem;
+}
+
+.cuda-kb-pillar > p {
+  margin-top: 0;
+}
+
+.cuda-kb-detail-list {
+  margin-top: 0.9rem;
+}
+
+.cuda-kb-detail-list h4 {
+  color: var(--text);
+  font-size: 0.82rem;
+  letter-spacing: 0;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.cuda-kb-detail-list li {
+  color: var(--muted);
+}
+
+.cuda-kb-source-row {
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+}
+
+.cuda-kb-source-row a {
+  background: color-mix(in srgb, var(--accent-soft), transparent 35%);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.82rem;
+  padding: 0.25rem 0.55rem;
+  text-decoration: none;
+}
+
+.cuda-kb-source-row a:hover {
+  border-color: var(--accent);
+}
+
+.cuda-command-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cuda-command-table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+.cuda-command-table th,
+.cuda-command-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.cuda-command-table thead th {
+  color: var(--text);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+}
+
+.cuda-command-table tbody th {
+  width: 16rem;
+}
+
+.cuda-command-table code {
+  background: color-mix(in srgb, var(--accent-soft), transparent 35%);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  display: inline-block;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  padding: 0.25rem 0.35rem;
+  white-space: normal;
+}
+
+.cuda-glossary-card span {
+  border-top: 1px solid var(--border);
+  color: var(--accent);
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
 }
 
 .rhythm-table {
@@ -1271,6 +1434,9 @@ textarea {
   .evidence-grid,
   .reference-grid,
   .prompt-grid,
+  .cuda-kb-track-grid,
+  .cuda-kb-workflow-grid,
+  .cuda-glossary-grid,
   .skill-map-grid,
   .month-columns,
   .control-grid,

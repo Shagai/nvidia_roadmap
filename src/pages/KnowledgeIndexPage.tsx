@@ -25,6 +25,10 @@ export function KnowledgeIndexPage() {
           Each month guide is intentionally practical. It tells you what to understand, what to build,
           what to measure, what traps to avoid, and what evidence should exist by the end of the month.
         </p>
+        <p>
+          Use the <Link to="/cuda-kb">CUDA field guide</Link> as the central reference for CUDA
+          concepts, workflows, commands, glossary terms, and official source links.
+        </p>
       </Section>
 
       <Section id="months" title="Month guides">

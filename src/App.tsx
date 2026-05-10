@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SharedLayout } from "./components/SharedLayout";
+import { CudaKnowledgeBasePage } from "./pages/CudaKnowledgeBasePage";
 import { CudaLabPage } from "./pages/CudaLabPage";
 import { DiaryPage } from "./pages/DiaryPage";
 import { ExportPage } from "./pages/ExportPage";
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="why" element={<WhyFitPage />} />
         <Route path="knowledge" element={<KnowledgeIndexPage />} />
         <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
+        <Route path="cuda-kb" element={<CudaKnowledgeBasePage />} />
         <Route path="skill-map" element={<SkillMapPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="cuda-lab" element={<CudaLabPage />} />

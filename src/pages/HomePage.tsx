@@ -46,6 +46,9 @@ export function HomePage() {
           <ReadingCard to="/knowledge" title="Study the curriculum">
             Open the concept, lab, interview, and evidence guide for each month.
           </ReadingCard>
+          <ReadingCard to="/cuda-kb" title="Use the CUDA KB">
+            Keep CUDA concepts, workflows, commands, glossary, and official sources in one place.
+          </ReadingCard>
           <ReadingCard to="/cuda-lab" title="Build GPU intuition">
             Explore blocks, threads, warps, and memory access quality.
           </ReadingCard>
