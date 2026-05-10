@@ -1,6 +1,8 @@
 import { Callout } from "../components/Callout";
+import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
+import { cudaFundamentalsInterviewAnswers } from "../data/cudaFundamentals";
 import { explanationDrills, interviewStories } from "../data/plan";
 
 const algorithmTopics = [
@@ -36,6 +38,7 @@ export function InterviewPrepPage() {
         { id: "topics", label: "Topics" },
         { id: "stories", label: "Stories" },
         { id: "drills", label: "Drills" },
+        { id: "cuda-fundamentals", label: "CUDA answers" },
       ]}
     >
       <Section id="cadence" title="Weekly cadence">
@@ -87,12 +90,35 @@ export function InterviewPrepPage() {
             <li key={drill}>{drill}</li>
           ))}
         </ul>
-        <pre className="code-block">{`mock loop:
+        <CodeBlock>{`mock loop:
 4 C++ interviews
 4 algorithms interviews
 3 system design interviews
 3 CUDA/performance interviews
-2 behavioral interviews`}</pre>
+2 behavioral interviews`}</CodeBlock>
+      </Section>
+
+      <Section
+        id="cuda-fundamentals"
+        title="CUDA fundamentals prompt answers"
+        note="Use the short answer first, then tie it back to measured project evidence."
+      >
+        <div className="answer-grid compact-answers">
+          {cudaFundamentalsInterviewAnswers.map((answer) => (
+            <article className="answer-card" key={answer.prompt}>
+              <h3>{answer.prompt}</h3>
+              <p className="short-answer">{answer.shortAnswer}</p>
+              <ul>
+                {answer.deepAnswer.slice(0, 2).map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+              <p className="evidence-hook">
+                <strong>Evidence hook:</strong> {answer.evidenceHook}
+              </p>
+            </article>
+          ))}
+        </div>
       </Section>
     </EssayLayout>
   );

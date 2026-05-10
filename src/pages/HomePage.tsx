@@ -43,6 +43,9 @@ export function HomePage() {
           <ReadingCard to="/roadmap" title="Work month by month">
             Track deliverables from May 2026 through April 2027.
           </ReadingCard>
+          <ReadingCard to="/knowledge" title="Study the curriculum">
+            Open the concept, lab, interview, and evidence guide for each month.
+          </ReadingCard>
           <ReadingCard to="/cuda-lab" title="Build GPU intuition">
             Explore blocks, threads, warps, and memory access quality.
           </ReadingCard>

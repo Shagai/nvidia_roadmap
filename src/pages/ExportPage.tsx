@@ -1,3 +1,4 @@
+import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { ExportImportPanel } from "../components/ExportImportPanel";
 import { Section } from "../components/Section";
@@ -19,12 +20,12 @@ export function ExportPage() {
           skills, roadmap progress, diary, portfolio, theme, and version. Export JSON is the portable
           snapshot.
         </p>
-        <pre className="code-block">{`nvidia-plan-skills
+        <CodeBlock>{`nvidia-plan-skills
 nvidia-plan-roadmap-progress
 nvidia-plan-diary
 nvidia-plan-portfolio
 nvidia-plan-theme
-nvidia-plan-version`}</pre>
+nvidia-plan-version`}</CodeBlock>
       </Section>
 
       <Section id="panel" title="Export/import panel">

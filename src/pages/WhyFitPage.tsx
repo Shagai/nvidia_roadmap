@@ -1,4 +1,5 @@
 import { Callout } from "../components/Callout";
+import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
 
@@ -68,13 +69,13 @@ export function WhyFitPage() {
           The portfolio should be inspectable in five minutes: README, screenshots, benchmark table,
           architecture diagram, and reproducible build instructions.
         </p>
-        <pre className="code-block">{`CV headline direction:
+        <CodeBlock>{`CV headline direction:
 C++ / CUDA / Robotics Software Engineer
 
 Signal to build:
 performance measurement > API familiarity
 end-to-end latency > isolated demo speed
-clear architecture > pile of experiments`}</pre>
+clear architecture > pile of experiments`}</CodeBlock>
       </Section>
     </EssayLayout>
   );

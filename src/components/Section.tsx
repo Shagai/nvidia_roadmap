@@ -12,9 +12,9 @@ export function Section({ id, title, children, note }: SectionProps) {
     <section id={id} className="essay-section">
       <div className="section-content">
         <h2>{title}</h2>
+        {note ? <aside className="margin-note">{note}</aside> : null}
         {children}
       </div>
-      {note ? <aside className="margin-note">{note}</aside> : null}
     </section>
   );
 }

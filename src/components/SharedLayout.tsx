@@ -5,6 +5,7 @@ import { useProgress } from "../state/ProgressContext";
 const navItems = [
   { to: "/", label: "Overview", end: true },
   { to: "/why", label: "Why this path" },
+  { to: "/knowledge", label: "Knowledge" },
   { to: "/skill-map", label: "Skill map" },
   { to: "/roadmap", label: "Roadmap" },
   { to: "/cuda-lab", label: "CUDA lab" },

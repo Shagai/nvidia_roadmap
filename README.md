@@ -49,6 +49,8 @@ src/
 
 - `/` - Home / overview dashboard
 - `/why` - Why this NVIDIA path fits
+- `/knowledge` - Monthly knowledge base index
+- `/knowledge/:monthId` - Month-specific curriculum guide, for example `/knowledge/2026-06`
 - `/skill-map` - Interactive readiness skill map
 - `/roadmap` - May 2026 to April 2027 roadmap timeline
 - `/cuda-lab` - CUDA execution visualizer

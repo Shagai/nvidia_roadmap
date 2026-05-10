@@ -5,6 +5,8 @@ import { DiaryPage } from "./pages/DiaryPage";
 import { ExportPage } from "./pages/ExportPage";
 import { HomePage } from "./pages/HomePage";
 import { InterviewPrepPage } from "./pages/InterviewPrepPage";
+import { KnowledgeIndexPage } from "./pages/KnowledgeIndexPage";
+import { MonthKnowledgePage } from "./pages/MonthKnowledgePage";
 import { PortfolioPage } from "./pages/PortfolioPage";
 import { ProfilingLabPage } from "./pages/ProfilingLabPage";
 import { RoadmapPage } from "./pages/RoadmapPage";
@@ -17,6 +19,8 @@ export default function App() {
       <Route element={<SharedLayout />}>
         <Route index element={<HomePage />} />
         <Route path="why" element={<WhyFitPage />} />
+        <Route path="knowledge" element={<KnowledgeIndexPage />} />
+        <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
         <Route path="skill-map" element={<SkillMapPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="cuda-lab" element={<CudaLabPage />} />

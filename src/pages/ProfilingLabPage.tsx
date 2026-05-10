@@ -1,4 +1,5 @@
 import { Callout } from "../components/Callout";
+import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { PipelineLatencySimulator } from "../components/PipelineLatencySimulator";
 import { Section } from "../components/Section";
@@ -32,12 +33,12 @@ export function ProfilingLabPage() {
           Record the timeline, the bottleneck, the hypothesis, the change, and the before/after
           number. That turns profiling into evidence instead of a screenshot collection.
         </Callout>
-        <pre className="code-block">{`profiling loop:
+        <CodeBlock>{`profiling loop:
 1. Measure the whole pipeline.
 2. Find the dominant stage.
 3. Form one hypothesis.
 4. Change one thing.
-5. Re-measure and write the result.`}</pre>
+5. Re-measure and write the result.`}</CodeBlock>
       </Section>
     </EssayLayout>
   );

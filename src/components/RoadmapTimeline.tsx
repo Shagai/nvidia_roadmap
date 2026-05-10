@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { roadmap } from "../data/plan";
 import { useProgress } from "../state/ProgressContext";
 import { roadmapCompletion, roadmapItemKey } from "../utils/progress";
@@ -91,6 +92,9 @@ export function RoadmapTimeline() {
                 ))}
               </ul>
             </details>
+            <Link className="month-guide-link" to={`/knowledge/${month.id}`}>
+              Open month knowledge guide
+            </Link>
           </article>
         ))}
       </div>
