@@ -5,9 +5,14 @@ import App from "./App";
 import { ProgressProvider } from "./state/ProgressContext";
 import "./styles.css";
 
+const routerBasename =
+  import.meta.env.BASE_URL === "/"
+    ? undefined
+    : import.meta.env.BASE_URL.replace(/\/$/, "");
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <ProgressProvider>
         <App />
       </ProgressProvider>
