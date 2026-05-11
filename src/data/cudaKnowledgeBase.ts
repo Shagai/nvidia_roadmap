@@ -260,7 +260,7 @@ export const cudaKnowledgePillars: CudaKnowledgePillar[] = [
       "runtime-api-occupancy",
       "nsight-compute",
     ],
-    deepDivePath: "/cuda-kb/launch-configuration",
+    deepDivePath: "/cuda-kb/execution-model",
   },
   {
     id: "memory",

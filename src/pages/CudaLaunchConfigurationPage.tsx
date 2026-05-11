@@ -102,25 +102,251 @@ const generationGuidance = [
   },
 ];
 
+const executionKnowSections = [
+  {
+    title: "Launch geometry is the logical work shape",
+    thesis:
+      "Grid and block dimensions define how much logical CUDA work exists before the hardware scheduler starts assigning blocks to SMs.",
+    details: [
+      "The grid is the full set of blocks created by one kernel launch.",
+      "A block is a group of threads that can cooperate through shared memory and block-level synchronization.",
+      "The launch shape must cover the data shape, but it does not by itself prove the kernel is fast.",
+      "For a simple 1D kernel, the first accounting line is useful elements, launched threads, and guard threads.",
+    ],
+    diagnostic:
+      "Before running the kernel, calculate grid blocks, total launched threads, useful threads, and the final block's guard threads.",
+  },
+  {
+    title: "Indexing is the correctness contract",
+    thesis:
+      "blockIdx, blockDim, and threadIdx are the first CUDA built-ins to master because they decide which data each thread owns.",
+    details: [
+      "For 1D data, the standard index is blockIdx.x * blockDim.x + threadIdx.x.",
+      "For row-major 2D data, x should usually come from threadIdx.x so adjacent lanes touch adjacent addresses.",
+      "Ceiling division intentionally launches extra threads; the bounds guard is part of the contract.",
+      "Correctness tests should include sizes that are not divisible by the chosen block size.",
+    ],
+    diagnostic:
+      "If a kernel is wrong, inspect the global index formula and boundary guard before changing performance code.",
+  },
+  {
+    title: "Warps make hardware behavior visible",
+    thesis:
+      "CUDA exposes threads, but hardware schedules them in warps. That is where coalescing, inactive lanes, and branch divergence become visible.",
+    details: [
+      "Current CUDA compute-capability tables list warp size as 32 threads.",
+      "Block sizes that are multiples of 32 avoid a partly unused final warp for ordinary 1D launches.",
+      "Consecutive threadIdx.x lanes should usually access consecutive memory addresses.",
+      "When lanes in the same warp take different branches, the warp serializes those paths.",
+    ],
+    diagnostic:
+      "Ask whether adjacent lanes read adjacent addresses and whether lanes in the same warp follow the same branch path.",
+  },
+  {
+    title: "Blocks are the cooperation boundary",
+    thesis:
+      "Threads in the same block can share block-local shared memory and synchronize with __syncthreads; threads in different blocks usually cannot coordinate during a normal launch.",
+    details: [
+      "Every block is placed on one SM and normally runs to completion there.",
+      "Shared memory is allocated per block, not per grid.",
+      "__syncthreads only synchronizes threads inside the same block.",
+      "Different blocks must be independent unless the kernel uses a specialized cooperative or clustered design.",
+    ],
+    diagnostic:
+      "If the algorithm needs cross-block communication inside one launch, redesign the work split or use a specialized CUDA feature deliberately.",
+  },
+  {
+    title: "Occupancy is useful, not absolute",
+    thesis:
+      "Occupancy helps hide latency by keeping resident warps available, but the fastest kernel also depends on memory access, registers, shared memory, instruction mix, and algorithm design.",
+    details: [
+      "A block must fit within an SM's thread, warp, register, shared-memory, and resident-block limits.",
+      "Large blocks can reduce the number of resident blocks and expose tail effects.",
+      "High occupancy cannot repair scattered memory access or unnecessary global memory traffic.",
+      "Use the occupancy APIs and Nsight Compute as guides, then keep the launch shape that wins the benchmark.",
+    ],
+    diagnostic:
+      "When tuning, record achieved occupancy beside memory throughput, register count, shared memory per block, and the dominant stall reason.",
+  },
+];
+
+const executionPractice = [
+  {
+    title: "Create a launch ledger",
+    purpose: "Make every simple kernel explainable before profiling it.",
+    steps: [
+      "Write the global index formula beside the kernel.",
+      "Compute useful elements, grid blocks, launched threads, guard threads, and warps per block.",
+      "Add at least one test size that is smaller than a block and one that is not divisible by the block size.",
+    ],
+    evidence: [
+      "A comment, README row, or benchmark row with n, block, grid, launched threads, and guard threads.",
+      "A correctness run for a non-divisible input size.",
+    ],
+  },
+  {
+    title: "Run a block-size sweep",
+    purpose: "Treat block size as a measured variable instead of a belief.",
+    steps: [
+      "Run the same release build with 64, 128, 256, and 512 threads per block.",
+      "Keep input size, data layout, timing method, and correctness checks unchanged.",
+      "Add 1024 only when the kernel type gives a reason, such as a reduction experiment.",
+    ],
+    evidence: [
+      "A table with block size, grid size, kernel time, achieved bandwidth or throughput, and correctness status.",
+      "One sentence explaining which launch shape won and why the result is plausible.",
+    ],
+  },
+  {
+    title: "Annotate one profiler report",
+    purpose: "Connect the launch shape to the hardware behavior Nsight reports.",
+    steps: [
+      "Capture a Nsight Compute report for the target kernel.",
+      "Record launch dimensions, registers per thread, shared memory per block, achieved occupancy, and dominant stall reason.",
+      "Decide whether the next experiment should change block size, memory access, shared memory, or algorithm structure.",
+    ],
+    evidence: [
+      "A profiler screenshot or exported metric set tied to one code decision.",
+      "A short note that names the bottleneck instead of only reporting elapsed time.",
+    ],
+  },
+];
+
+const executionTraps = [
+  {
+    title: "Forgetting the bounds guard",
+    symptom: "The kernel works for some input sizes and fails or corrupts memory for sizes that are not divisible by the block size.",
+    whyItHappens:
+      "Ceiling division launches enough threads to cover the input, which means the final block often contains extra logical threads.",
+    correction: [
+      "Use if (i < n) for 1D kernels and x/y bounds checks for 2D kernels.",
+      "Keep a non-divisible input size in the correctness test set.",
+    ],
+  },
+  {
+    title: "Assuming the largest block size is best",
+    symptom: "A 1024-thread block looks more parallel but performs worse or leaves fewer resident blocks per SM.",
+    whyItHappens:
+      "A larger block consumes more threads, warps, registers, and shared memory as one scheduling unit.",
+    correction: [
+      "Start at 128 or 256 and benchmark nearby choices.",
+      "Use 1024 only when measurement and kernel structure justify it.",
+    ],
+  },
+  {
+    title: "Treating occupancy as the final score",
+    symptom: "A higher-occupancy launch does not improve the benchmark, or it regresses performance.",
+    whyItHappens:
+      "Occupancy helps latency hiding, but it does not measure coalescing, cache locality, instruction count, or useful work per memory access.",
+    correction: [
+      "Read occupancy beside memory throughput, register pressure, shared memory use, and stall reasons.",
+      "Prefer the measured fastest correct kernel, not the launch with the prettiest occupancy number.",
+    ],
+  },
+  {
+    title: "Ignoring branch divergence",
+    symptom: "The launch has many threads, but warps spend time serializing different branch paths.",
+    whyItHappens:
+      "Threads are exposed individually, but warp lanes execute together when they are active on the same instruction path.",
+    correction: [
+      "Keep common branch decisions aligned across neighboring lanes when possible.",
+      "Use profiler stall and branch metrics before rewriting the algorithm.",
+    ],
+  },
+];
+
+const executionInterviewAnswers = [
+  {
+    prompt: "Explain grid, block, thread, warp, and SM in one answer.",
+    shortAnswer:
+      "A kernel launch creates a grid of blocks; each block contains threads. The hardware groups threads into warps, and SMs schedule resident blocks and warps subject to resource limits.",
+    deepAnswer: [
+      "Grid and block dimensions are the logical execution configuration chosen by host code.",
+      "threadIdx, blockIdx, and blockDim let each thread compute the data it owns.",
+      "Warps make coalescing and divergence visible because lanes execute together.",
+      "Blocks are scheduled onto SMs in waves; a grid can contain far more blocks than the GPU has SMs.",
+    ],
+    evidenceToCollect:
+      "A launch ledger for one kernel plus a profiler report showing launch dimensions and achieved occupancy.",
+  },
+  {
+    prompt: "Why is 256 threads per block a common starting point?",
+    shortAnswer:
+      "It is 8 warps: usually enough to expose latency-hiding opportunities without making each block so large that only one resident block fits.",
+    deepAnswer: [
+      "It is a multiple of the 32-thread warp size.",
+      "It works well for many simple memory-bound kernels with low register and shared-memory pressure.",
+      "It is still only a baseline; benchmark 128 and 512 before making a performance claim.",
+    ],
+    evidenceToCollect: "A block-size sweep with 128, 256, and 512 under the same benchmark harness.",
+  },
+  {
+    prompt: "Why is 1024 not automatically better?",
+    shortAnswer:
+      "1024 threads is the maximum per-block size on many architectures, but a block that large can reduce resident blocks, expose resource pressure, and create coarse scheduling.",
+    deepAnswer: [
+      "A 1024-thread block contains 32 warps.",
+      "On an SM with a 1536 resident-thread limit, the thread limit alone permits only one 1024-thread block.",
+      "If registers or shared memory are high, a large block may reduce occupancy further or fail to fit.",
+    ],
+    evidenceToCollect:
+      "An occupancy calculation or Nsight Compute report comparing 256 and 1024 for the same kernel.",
+  },
+  {
+    prompt: "When would you use a grid-stride loop?",
+    shortAnswer:
+      "Use it when you want a controlled number of launched blocks while still covering a large or variable-size input.",
+    deepAnswer: [
+      "Each thread starts at its global index and advances by blockDim.x * gridDim.x.",
+      "It is useful for persistent-style work distribution, very large inputs, and reusable kernels.",
+      "For first beginner examples, ceil(n / block) is still the simpler baseline.",
+    ],
+    evidenceToCollect: "A kernel variant that logs grid size, stride, and total elements covered.",
+  },
+];
+
 export function CudaLaunchConfigurationPage() {
   return (
     <EssayLayout
       eyebrow="CUDA knowledge pillar"
-      title="CUDA Launch Configuration"
-      dek="How to choose the triple-chevron grid and block dimensions, why 256 threads is a common first guess, when to use grid-stride loops, and how occupancy limits turn launch syntax into hardware behavior."
+      title="CUDA Execution Model"
+      dek="The programming model exposes grids, blocks, and threads. Hardware executes threads in warps on streaming multiprocessors. Correct indexing makes the kernel right; understanding warps, occupancy, scheduling, and divergence explains why the kernel is fast or slow."
       toc={[
+        { id: "frame", label: "Frame" },
         { id: "syntax", label: "Syntax" },
         { id: "coverage", label: "Coverage" },
+        { id: "know", label: "Know" },
         { id: "sms", label: "Blocks vs SMs" },
         { id: "warps", label: "Why 256" },
         { id: "occupancy", label: "Occupancy" },
+        { id: "practice", label: "Practice" },
+        { id: "traps", label: "Traps" },
         { id: "choices", label: "First choices" },
         { id: "patterns", label: "Patterns" },
         { id: "generations", label: "Generations" },
         { id: "workflow", label: "Workflow" },
+        { id: "interview", label: "Interview" },
         { id: "sources", label: "Sources" },
       ]}
     >
+      <Section
+        id="frame"
+        title="The frame"
+        note="This is the execution-model layer: first make the work correct, then explain what the scheduler and hardware resources are likely doing."
+      >
+        <p>
+          The execution model connects CUDA syntax to GPU behavior. The triple-chevron launch
+          describes the logical work shape. Built-in indices make each thread responsible for a
+          precise slice of data. Warps, blocks, SM resources, and memory access patterns explain why
+          one correct launch shape can outperform another.
+        </p>
+        <Callout title="One sentence to keep nearby" tone="success">
+          Start with blockDim = 256 and gridDim = ceil(problem_size / 256), prove the indexing and
+          guard are correct, then tune with block-size sweeps, occupancy evidence, and profiler
+          metrics.
+        </Callout>
+      </Section>
+
       <Section
         id="syntax"
         title="Triple-chevron syntax"
@@ -169,6 +395,25 @@ int block = 256;
 int grid  = (n + block - 1) / block;
 vecAddKernel<<<grid, block>>>(A_d, B_d, C_d, n);`}</CodeBlock>
         <CudaLaunchGeometryFigure />
+      </Section>
+
+      <Section id="know" title="Know">
+        <div className="mental-model-section-grid">
+          {executionKnowSections.map((section) => (
+            <article className="mental-model-deep-card" key={section.title}>
+              <h3>{section.title}</h3>
+              <p className="short-answer">{section.thesis}</p>
+              <ul>
+                {section.details.map((detail) => (
+                  <li key={detail}>{detail}</li>
+                ))}
+              </ul>
+              <p className="evidence-hook">
+                <strong>Diagnostic:</strong> {section.diagnostic}
+              </p>
+            </article>
+          ))}
+        </div>
       </Section>
 
       <Section
@@ -253,6 +498,36 @@ occupancy        = activeWarpsPerSM / maxWarpsPerSM;`}</CodeBlock>
           the thread limit alone allows only one such block per SM. With 256-thread blocks, the same
           thread limit can allow six blocks and 48 resident warps before other resources are counted.
         </Callout>
+      </Section>
+
+      <Section id="practice" title="Practice">
+        <div className="mental-model-practice-grid">
+          {executionPractice.map((practice) => (
+            <article className="mental-model-practice-card" key={practice.title}>
+              <h3>{practice.title}</h3>
+              <p>{practice.purpose}</p>
+              <DetailList title="Steps" items={practice.steps} ordered />
+              <DetailList title="Evidence" items={practice.evidence} />
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section id="traps" title="Traps">
+        <div className="mental-model-trap-list">
+          {executionTraps.map((trap) => (
+            <article className="mental-model-trap-card" key={trap.title}>
+              <h3>{trap.title}</h3>
+              <p>
+                <strong>Symptom:</strong> {trap.symptom}
+              </p>
+              <p>
+                <strong>Why it happens:</strong> {trap.whyItHappens}
+              </p>
+              <DetailList title="Correction" items={trap.correction} />
+            </article>
+          ))}
+        </div>
       </Section>
 
       <Section
@@ -422,6 +697,29 @@ vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
         </p>
       </Section>
 
+      <Section id="interview" title="Interview checks">
+        <p>
+          When the execution model is solid, these answers should come from one kernel's launch
+          ledger and profiler evidence instead of from CUDA vocabulary alone.
+        </p>
+        <div className="answer-grid">
+          {executionInterviewAnswers.map((answer) => (
+            <article className="answer-card" key={answer.prompt}>
+              <h3>{answer.prompt}</h3>
+              <p className="short-answer">{answer.shortAnswer}</p>
+              <ul>
+                {answer.deepAnswer.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+              <p className="evidence-hook">
+                <strong>Evidence to collect:</strong> {answer.evidenceToCollect}
+              </p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
       <Section
         id="sources"
         title="Official source anchors"
@@ -452,5 +750,28 @@ vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
         </div>
       </Section>
     </EssayLayout>
+  );
+}
+
+function DetailList({
+  title,
+  items,
+  ordered = false,
+}: {
+  title: string;
+  items: string[];
+  ordered?: boolean;
+}) {
+  const ListTag = ordered ? "ol" : "ul";
+
+  return (
+    <div className="detail-list">
+      <h4>{title}</h4>
+      <ListTag>
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ListTag>
+    </div>
   );
 }

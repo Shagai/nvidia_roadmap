@@ -26,6 +26,7 @@ export default function App() {
         <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
         <Route path="cuda-kb" element={<CudaKnowledgeBasePage />} />
         <Route path="cuda-kb/mental-model" element={<CudaMentalModelPage />} />
+        <Route path="cuda-kb/execution-model" element={<CudaLaunchConfigurationPage />} />
         <Route path="cuda-kb/launch-configuration" element={<CudaLaunchConfigurationPage />} />
         <Route path="skill-map" element={<SkillMapPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />

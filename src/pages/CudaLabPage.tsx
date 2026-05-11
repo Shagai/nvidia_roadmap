@@ -34,9 +34,9 @@ export function CudaLabPage() {
           synchronization, and resource use determine how efficiently the GPU runs it.
         </p>
         <p>
-          For the full launch-configuration explanation, use the{" "}
-          <Link to="/cuda-kb/launch-configuration">CUDA launch configuration guide</Link> before
-          running block-size sweeps in this lab.
+          For the full launch-configuration and occupancy explanation, use the{" "}
+          <Link to="/cuda-kb/execution-model">CUDA execution model guide</Link> before running
+          block-size sweeps in this lab.
         </p>
       </Section>
 
