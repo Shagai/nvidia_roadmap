@@ -97,6 +97,20 @@ export const cudaSources: CudaKnowledgeSource[] = [
     checked: "2026-05-10",
   },
   {
+    id: "programming-guide-compute-capabilities",
+    label: "CUDA Programming Guide: Compute Capabilities",
+    url: "https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/compute-capabilities.html",
+    scope: "Feature and technical specification tables for compute capabilities, including warp size, resident resources, and architecture limits.",
+    checked: "2026-05-11",
+  },
+  {
+    id: "cuda-gpus",
+    label: "CUDA GPU Compute Capability",
+    url: "https://developer.nvidia.com/cuda-gpus",
+    scope: "NVIDIA-maintained product-to-compute-capability mapping for data-center, workstation, and consumer GPUs.",
+    checked: "2026-05-11",
+  },
+  {
     id: "best-practices",
     label: "CUDA C++ Best Practices Guide",
     url: "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html",
@@ -109,6 +123,13 @@ export const cudaSources: CudaKnowledgeSource[] = [
     url: "https://docs.nvidia.com/cuda/cuda-runtime-api/index.html",
     scope: "Reference for cudaMalloc, cudaMemcpy, streams, events, error codes, device management, and runtime behavior.",
     checked: "2026-05-10",
+  },
+  {
+    id: "runtime-api-occupancy",
+    label: "CUDA Runtime API: Occupancy",
+    url: "https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__OCCUPANCY.html",
+    scope: "Reference for occupancy helper APIs such as cudaOccupancyMaxActiveBlocksPerMultiprocessor and cudaOccupancyMaxPotentialBlockSize.",
+    checked: "2026-05-11",
   },
   {
     id: "nvcc",
@@ -232,7 +253,14 @@ export const cudaKnowledgePillars: CudaKnowledgePillar[] = [
       "Treating maximum occupancy as the same thing as maximum performance.",
       "Ignoring branch divergence inside a warp.",
     ],
-    sourceIds: ["programming-guide", "best-practices", "nsight-compute"],
+    sourceIds: [
+      "programming-guide",
+      "programming-guide-compute-capabilities",
+      "best-practices",
+      "runtime-api-occupancy",
+      "nsight-compute",
+    ],
+    deepDivePath: "/cuda-kb/launch-configuration",
   },
   {
     id: "memory",
@@ -610,6 +638,16 @@ export const cudaGlossary: CudaGlossaryItem[] = [
     term: "Occupancy",
     meaning: "A measure of active warps relative to the hardware's possible active warps.",
     whenItMatters: "Useful for latency hiding, but not a standalone performance target.",
+  },
+  {
+    term: "Grid-Stride Loop",
+    meaning: "A kernel loop where each thread processes indexes separated by blockDim.x * gridDim.x.",
+    whenItMatters: "Useful when the launch uses a fixed number of blocks while still covering very large inputs.",
+  },
+  {
+    term: "Dynamic Shared Memory",
+    meaning: "Per-block shared memory requested through the third kernel launch parameter and addressed through extern __shared__ declarations.",
+    whenItMatters: "Important for reductions, tiles, and kernels whose shared-memory size depends on the launch shape.",
   },
   {
     term: "Coalescing",

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Callout } from "../components/Callout";
 import { CodeBlock } from "../components/CodeBlock";
 import { CudaBenchmarkPlanner } from "../components/CudaBenchmarkPlanner";
@@ -31,6 +32,11 @@ export function CudaLabPage() {
           CUDA starts to feel less mysterious when I separate the launch shape from the performance
           story. Blocks and threads define the work shape. Warps, memory access, divergence,
           synchronization, and resource use determine how efficiently the GPU runs it.
+        </p>
+        <p>
+          For the full launch-configuration explanation, use the{" "}
+          <Link to="/cuda-kb/launch-configuration">CUDA launch configuration guide</Link> before
+          running block-size sweeps in this lab.
         </p>
       </Section>
 

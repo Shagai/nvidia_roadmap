@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { SharedLayout } from "./components/SharedLayout";
 import { CudaKnowledgeBasePage } from "./pages/CudaKnowledgeBasePage";
 import { CudaLabPage } from "./pages/CudaLabPage";
+import { CudaLaunchConfigurationPage } from "./pages/CudaLaunchConfigurationPage";
 import { CudaMentalModelPage } from "./pages/CudaMentalModelPage";
 import { DiaryPage } from "./pages/DiaryPage";
 import { ExportPage } from "./pages/ExportPage";
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
         <Route path="cuda-kb" element={<CudaKnowledgeBasePage />} />
         <Route path="cuda-kb/mental-model" element={<CudaMentalModelPage />} />
+        <Route path="cuda-kb/launch-configuration" element={<CudaLaunchConfigurationPage />} />
         <Route path="skill-map" element={<SkillMapPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="cuda-lab" element={<CudaLabPage />} />
