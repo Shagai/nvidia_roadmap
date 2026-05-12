@@ -62,6 +62,23 @@ export type CudaMentalModelTrap = {
   symptom: string;
   whyItHappens: string;
   correction: string[];
+  deepDivePath?: string;
+};
+
+export type CudaMentalModelTrapDeepDiveSection = {
+  title: string;
+  paragraphs?: string[];
+  bullets?: string[];
+  code?: string;
+};
+
+export type CudaMentalModelTrapDeepDive = {
+  slug: string;
+  title: string;
+  summary: string;
+  trapTitle: string;
+  sections: CudaMentalModelTrapDeepDiveSection[];
+  sourceIds: string[];
 };
 
 export type CudaMentalModelInterviewAnswer = {
@@ -930,6 +947,7 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
         "Make each thread own a meaningful independent output or tile.",
         "Keep serial orchestration on the host unless device-side control is specifically justified.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/gpu-as-faster-cpu",
     },
     {
       title: "Kernel-only speedup presented as application speedup",
@@ -942,6 +960,7 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
         "Include H2D, D2H, allocation if relevant, CPU prep, and CPU post where the application pays for them.",
         "Use end-to-end time for product claims and kernel-only time for device-code tuning.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/kernel-only-speedup",
     },
     {
       title: "Copy bounce pipeline",
@@ -954,6 +973,7 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
         "Copy back only summary data or final output when possible.",
         "Draw the buffer ownership diagram before adding another transfer.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/copy-bounce-pipeline",
     },
     {
       title: "Launch geometry confused with hardware utilization",
@@ -966,6 +986,7 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
         "Measure achieved behavior with timing and profiler metrics.",
         "Explain performance through memory access, divergence, synchronization, register pressure, and occupancy together.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/launch-geometry-utilization",
     },
     {
       title: "Unified Memory treated as free movement",
@@ -974,10 +995,12 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
       whyItHappens:
         "A shared address space is mistaken for shared physical locality.",
       correction: [
-        "Use Unified Memory deliberately, especially while porting or simplifying ownership.",
-        "Still reason about who touches the data first, where it is reused, and when synchronization makes access legal.",
-        "For performance learning, compare against an explicit-copy version so the movement is visible.",
+        "Use Unified Memory deliberately for prototyping, porting, irregular structures, or simplifying ownership while learning the algorithm.",
+        "Reason about who touches each allocation first: CPU initialize, GPU read, GPU write, CPU read result, or repeated CPU/GPU alternation.",
+        "Synchronize before the CPU consumes GPU-written managed data.",
+        "For performance learning, implement an explicit-copy version with cudaMalloc and cudaMemcpy so the movement and timing are visible.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/unified-memory",
     },
     {
       title: "Correctness deferred until after optimization",
@@ -987,9 +1010,12 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
         "Optimization feels like progress, while correctness harnesses feel like overhead.",
       correction: [
         "Write the CPU reference and mismatch reporting first.",
-        "Keep the naive CUDA kernel as the baseline.",
-        "Optimize only after the baseline is correct and timed.",
+        "Keep the naive CUDA kernel as the baseline before adding shared memory, tiling, streams, or fusion.",
+        "Add timing only after correctness exists.",
+        "Optimize one thing at a time and compare again after every optimization.",
+        "Use absolute and relative tolerances for floating-point comparisons instead of exact equality.",
       ],
+      deepDivePath: "/cuda-kb/mental-model/traps/correctness-first",
     },
   ],
   interviewAnswers: [
@@ -1074,3 +1100,512 @@ export const cudaMentalModelGuide: CudaMentalModelGuide = {
   ],
   sourceIds: ["programming-guide", "best-practices", "runtime-api"],
 };
+
+export const cudaMentalModelTrapDeepDives: CudaMentalModelTrapDeepDive[] = [
+  {
+    slug: "gpu-as-faster-cpu",
+    title: "The GPU Is Not A Faster CPU",
+    trapTitle: "GPU as a faster CPU",
+    summary:
+      "CUDA is strongest when many lightweight threads own independent work. Moving a serial loop into one GPU thread keeps the CPU mental model and loses the GPU advantage.",
+    sourceIds: ["programming-guide", "best-practices", "nsight-compute"],
+    sections: [
+      {
+        title: "What the mistake looks like",
+        paragraphs: [
+          "The code technically launches a CUDA kernel, but the kernel behaves like a serial CPU function. One thread does most of the loop, or the host launches many tiny kernels that each do too little work.",
+          "This can be seductive while learning because the kernel launch syntax appears correct. The problem is that the work ownership did not change. The GPU is being used as a remote scalar processor instead of a wide parallel device.",
+        ],
+        code: `__global__ void serial_on_gpu(const float* a,
+                              const float* b,
+                              float* c,
+                              int n)
+{
+    if (blockIdx.x == 0 && threadIdx.x == 0) {
+        for (int i = 0; i < n; ++i) {
+            c[i] = a[i] + b[i];
+        }
+    }
+}`,
+      },
+      {
+        title: "Why it is wrong",
+        paragraphs: [
+          "The GPU path now pays launch overhead and still exposes almost no parallelism. One thread performs the loop while most GPU lanes sit idle.",
+          "A second version of the same mistake is launching tiny kernels from the CPU for tiny fragments of work. The GPU can execute many threads, but kernel launches and synchronization are not free.",
+        ],
+        bullets: [
+          "The CPU is good at scalar orchestration, branchy control flow, and small cached loops.",
+          "The GPU is good at repeated work over many elements, pixels, particles, matrix entries, or tiles.",
+          "CUDA syntax is not the goal; a clear parallel ownership rule is the goal.",
+        ],
+      },
+      {
+        title: "Better ownership model",
+        paragraphs: [
+          "The first correction is to define what one CUDA thread owns. For a vector add, one thread owns one output element. For an image transform, one thread usually owns one output pixel. For a tiled matrix kernel, one block may own one output tile.",
+        ],
+        code: `__global__ void vector_add_gpu(const float* a,
+                               const float* b,
+                               float* c,
+                               int n)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        c[i] = a[i] + b[i];
+    }
+}`,
+      },
+      {
+        title: "Questions to ask",
+        bullets: [
+          "What repeated data-parallel dimension exists?",
+          "What exactly does one thread own?",
+          "Can different threads compute their outputs independently?",
+          "Does the kernel launch enough useful threads to amortize launch overhead?",
+          "Would this still be better if transfer and synchronization time are included?",
+        ],
+      },
+      {
+        title: "Short version",
+        paragraphs: [
+          "Wrong mental model: the GPU is a faster place to run my normal CPU loop.",
+          "Correct mental model: the GPU needs a large repeated ownership rule that creates enough independent work.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "kernel-only-speedup",
+    title: "Kernel-Only Speedup Is Not Application Speedup",
+    trapTitle: "Kernel-only speedup presented as application speedup",
+    summary:
+      "A fast kernel is only one line in the latency ledger. Application speedup must include the host work, transfers, launch overhead, synchronization, and postprocessing the user actually pays for.",
+    sourceIds: ["best-practices", "runtime-api", "nsight-systems", "nsight-compute"],
+    sections: [
+      {
+        title: "What the mistake looks like",
+        paragraphs: [
+          "A benchmark reports that the CUDA kernel is much faster than the CPU loop, but the measured number excludes host-to-device copies, device-to-host copies, allocation, synchronization, format conversion, and CPU-side setup.",
+          "That kernel-only number is useful for device-code tuning. It is not the same as the speedup a user sees when running the whole application path.",
+        ],
+        code: `// Narrow timing question: only the kernel body.
+start_cuda_event();
+kernel<<<grid, block>>>(d_input, d_output, n);
+stop_cuda_event();
+
+// Broader timing question: the path the application pays for.
+timer.start();
+cudaMemcpy(d_input, h_input, bytes, cudaMemcpyHostToDevice);
+kernel<<<grid, block>>>(d_input, d_output, n);
+cudaMemcpy(h_output, d_output, bytes, cudaMemcpyDeviceToHost);
+timer.stop();`,
+      },
+      {
+        title: "Why the headline can mislead",
+        paragraphs: [
+          "The kernel can be fast and the full GPU path can still be slow. This happens when the operation is small, transfer volume is large, allocation is inside the hot path, synchronization is excessive, or CPU preprocessing dominates the run.",
+          "The honest report names which speedup is being discussed. Kernel-only speedup asks whether the device code improved. End-to-end speedup asks whether the whole path improved.",
+        ],
+        bullets: [
+          "Kernel-only timing is useful for tuning kernel internals.",
+          "Transfer-inclusive timing is useful for application claims.",
+          "A good CUDA project reports both when both are relevant.",
+        ],
+      },
+      {
+        title: "Timing ledger to collect",
+        paragraphs: [
+          "For learning, write the benchmark row so it cannot hide boundary costs. A simple table with separate stages prevents accidental overclaiming.",
+        ],
+        code: `input       cpu_ms  h2d_ms  kernel_ms  d2h_ms  total_gpu_ms  speedup_e2e
+1080p       4.00    1.20    0.40       1.80    3.40          1.18x
+
+kernel_only_speedup = cpu_ms / kernel_ms;
+end_to_end_speedup  = cpu_ms / total_gpu_ms;`,
+      },
+      {
+        title: "Profiler view",
+        paragraphs: [
+          "Nsight Systems is the right first tool for this mistake because it shows the CPU/GPU timeline: API calls, memory copies, kernels, waits, and gaps. Nsight Compute is the next tool when one specific kernel needs deeper analysis.",
+        ],
+        bullets: [
+          "Use Nsight Systems to see whether copies, waits, launches, or CPU work dominate.",
+          "Use Nsight Compute to explain why the target kernel behaves the way it does.",
+          "Do not optimize kernel instructions before confirming that the kernel is the relevant bottleneck.",
+        ],
+      },
+      {
+        title: "Short version",
+        paragraphs: [
+          "Wrong mental model: my kernel is 10x faster, so my application is 10x faster.",
+          "Correct mental model: kernel-only speedup and end-to-end speedup answer different questions and both must be labeled.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "copy-bounce-pipeline",
+    title: "Avoid The Copy-Bounce Pipeline",
+    trapTitle: "Copy bounce pipeline",
+    summary:
+      "If every GPU stage copies data back to the CPU before the next GPU stage, the boundary cost becomes part of every operation. Keep intermediate data resident when the pipeline allows it.",
+    sourceIds: ["programming-guide", "best-practices", "runtime-api", "nsight-systems"],
+    sections: [
+      {
+        title: "What the mistake looks like",
+        paragraphs: [
+          "The program treats each kernel as a separate demo. Stage 1 copies input to the GPU, runs a kernel, copies output back to the CPU. Stage 2 then copies that output back to the GPU, runs another kernel, and copies back again.",
+          "This is easy to inspect and debug, but it can destroy the application-level speedup when intermediate buffers are large.",
+        ],
+        code: `// Copy-bounce shape:
+cudaMemcpy(d_a, h_a, bytes, cudaMemcpyHostToDevice);
+stage1<<<grid, block>>>(d_a, d_b);
+cudaMemcpy(h_b, d_b, bytes, cudaMemcpyDeviceToHost);
+
+cudaMemcpy(d_b, h_b, bytes, cudaMemcpyHostToDevice);
+stage2<<<grid, block>>>(d_b, d_c);
+cudaMemcpy(h_c, d_c, bytes, cudaMemcpyDeviceToHost);`,
+      },
+      {
+        title: "Why it is expensive",
+        paragraphs: [
+          "The CPU/GPU boundary is often the real cost. If every stage crosses the boundary twice, then the pipeline pays transfer cost even when the next operation also belongs on the GPU.",
+          "Copying every intermediate result can also force synchronization. That makes it harder to overlap work and easier to accidentally benchmark waiting instead of computation.",
+        ],
+        bullets: [
+          "Large intermediate arrays should usually stay on the device if the next stage is also a GPU stage.",
+          "Copying back is still useful for final output, summaries, debug checkpoints, and validation modes.",
+          "The mental model is buffer residency, not just individual kernel speed.",
+        ],
+      },
+      {
+        title: "Resident pipeline shape",
+        paragraphs: [
+          "A stronger design copies input once, runs multiple dependent kernels over device buffers, then copies only the final result or a small summary back to the CPU.",
+        ],
+        code: `// Device-resident shape:
+cudaMemcpy(d_a, h_a, bytes, cudaMemcpyHostToDevice);
+
+stage1<<<grid, block>>>(d_a, d_b);
+stage2<<<grid, block>>>(d_b, d_c);
+stage3<<<grid, block>>>(d_c, d_out);
+
+cudaMemcpy(h_out, d_out, out_bytes, cudaMemcpyDeviceToHost);`,
+      },
+      {
+        title: "What changes in the design",
+        paragraphs: [
+          "Keeping data resident is not only a performance change. It changes ownership, observability, memory lifetime, error handling, and correctness strategy.",
+          "The CPU no longer gets every intermediate array for free inspection. That means you may need debug modes that copy selected checkpoints, sampled validation, or CPU references for individual stages.",
+        ],
+        bullets: [
+          "Name which buffers are host-only, device-only, or mirrored.",
+          "Record when each buffer becomes valid.",
+          "Copy back final outputs by default and intermediate outputs only when debugging or validating.",
+          "Measure the copy-bounce and resident shapes with the same workload before claiming the improvement.",
+        ],
+      },
+      {
+        title: "Short version",
+        paragraphs: [
+          "Wrong mental model: every kernel should return its result to the CPU immediately.",
+          "Correct mental model: a GPU pipeline should keep intermediate data resident until the CPU actually needs it.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "launch-geometry-utilization",
+    title: "Launch Geometry Is Not Hardware Utilization",
+    trapTitle: "Launch geometry confused with hardware utilization",
+    summary:
+      "Grid and block dimensions prove coverage. They do not prove that memory access is efficient, warps are active, occupancy is useful, or the SMs are spending time on productive work.",
+    sourceIds: [
+      "programming-guide",
+      "programming-guide-compute-capabilities",
+      "best-practices",
+      "runtime-api-occupancy",
+      "nsight-compute",
+    ],
+    sections: [
+      {
+        title: "What the mistake looks like",
+        paragraphs: [
+          "The launch looks big enough, so it is assumed to use the GPU well. For example, a grid may contain many blocks and a block may contain 256 threads, but performance is still poor.",
+          "The launch configuration answers how many logical threads exist. It does not answer whether those threads access memory efficiently, avoid divergence, use resources well, or keep SMs busy with useful work.",
+        ],
+        code: `int block = 256;
+int grid = (n + block - 1) / block;
+kernel<<<grid, block>>>(...);
+
+// This proves coverage when the indexing and guard are correct.
+// It does not prove high bandwidth, high occupancy, or good scheduling behavior.`,
+      },
+      {
+        title: "What launch geometry proves",
+        paragraphs: [
+          "Launch geometry is still important. It proves that the kernel has enough logical workers to cover the problem and that the indexing math can map each worker to the correct output.",
+        ],
+        bullets: [
+          "Grid size tells you how many blocks were launched.",
+          "Block size tells you how many threads each block contains.",
+          "Ceiling division plus a bounds guard handles non-divisible problem sizes.",
+          "For correctness, record useful threads, launched threads, and guard threads.",
+        ],
+      },
+      {
+        title: "What launch geometry does not prove",
+        paragraphs: [
+          "After coverage is correct, the performance story moves to hardware behavior. That requires measurement and profiler evidence.",
+        ],
+        bullets: [
+          "Adjacent lanes may not access adjacent memory addresses.",
+          "Warps may diverge on branch paths.",
+          "Register or shared-memory use may reduce resident blocks.",
+          "High occupancy may still be limited by memory throughput or instruction mix.",
+          "A large grid may still suffer from small per-thread work, bad locality, or excessive synchronization.",
+        ],
+      },
+      {
+        title: "Better diagnostic loop",
+        paragraphs: [
+          "Use the launch calculation to make the kernel correct, then use timing and profiler metrics to explain performance.",
+        ],
+        code: `// Coverage ledger:
+useful_elements  = n;
+threads_per_block = 256;
+grid_blocks = ceil(n / threads_per_block);
+launched_threads = grid_blocks * threads_per_block;
+guard_threads = launched_threads - useful_elements;
+
+// Performance ledger:
+// achieved occupancy = ?
+// memory throughput = ?
+// registers per thread = ?
+// shared memory per block = ?
+// dominant stall reason = ?
+// branch divergence = ?
+// global memory coalescing = ?`,
+      },
+      {
+        title: "Short version",
+        paragraphs: [
+          "Wrong mental model: a large launch means the GPU is efficiently used.",
+          "Correct mental model: launch geometry proves coverage; profiler evidence explains utilization.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "unified-memory",
+    title: "Unified Memory Is Not Free Movement",
+    trapTitle: "Unified Memory treated as free movement",
+    summary:
+      "cudaMallocManaged gives CPU and GPU code one pointer, but the pages still have locality, migration cost, and synchronization rules.",
+    sourceIds: ["programming-guide", "runtime-api", "best-practices"],
+    sections: [
+      {
+        title: "What Unified Memory is",
+        paragraphs: [
+          "cudaMallocManaged gives you a pointer that can be used from both CPU code and GPU kernels. That makes ownership and porting simpler because the source code no longer needs separate host and device pointer names for the same logical allocation.",
+          "The important point is that unified address space does not mean the data is physically everywhere for free. The CPU and GPU can see the same pointer, but the memory pages still have to be located in CPU RAM, GPU memory, or migrated between them.",
+        ],
+        code: `float* x;
+cudaMallocManaged(&x, n * sizeof(float));
+
+x[0] = 1.0f;          // CPU can touch it
+kernel<<<grid, block>>>(x); // GPU can touch it`,
+      },
+      {
+        title: "The mistake",
+        paragraphs: [
+          "The wrong mental model is: since CPU and GPU can both access this pointer, I no longer need to think about data movement. CUDA still moves memory; it just may do it automatically and later than you expected.",
+        ],
+        code: `cudaMallocManaged(&x, n * sizeof(float));
+
+for (int i = 0; i < n; ++i) {
+    x[i] = static_cast<float>(i); // CPU initializes x
+}
+
+kernel<<<blocks, threads>>>(x);
+cudaDeviceSynchronize();
+
+std::cout << x[0] << "\\n";`,
+        bullets: [
+          "CPU writes x, so pages can be resident on the CPU side.",
+          "The GPU kernel starts and touches x.",
+          "The GPU may fault on those pages.",
+          "CUDA migrates pages to the GPU.",
+          "The CPU later reads x, so pages may need to migrate back.",
+        ],
+      },
+      {
+        title: "Why performance becomes unpredictable",
+        paragraphs: [
+          "The cost depends on the access pattern. A simple CPU initialize, GPU compute for a long time, CPU read final result pattern is usually reasonable.",
+          "The suspicious pattern is repeated alternation: CPU touches data, GPU touches data, CPU touches data, GPU touches data. The same pages can bounce between processors, which is page migration thrashing.",
+          "Unified Memory also does not remove the need for synchronization. Kernel launches are asynchronous. If the CPU reads a value that the GPU is still writing, the shared pointer does not make that access legal.",
+        ],
+        code: `kernel<<<blocks, threads>>>(x);
+cudaDeviceSynchronize(); // required before the CPU reads GPU-written data
+
+std::cout << x[0] << "\\n";`,
+      },
+      {
+        title: "Better mental model",
+        paragraphs: [
+          "Think of Unified Memory as: CUDA will help me manage movement, but movement still exists. Do not think: movement disappeared.",
+          "Unified Memory is useful for prototyping, porting CPU code to CUDA, simplifying ownership, irregular data structures, and learning the algorithm first. For performance learning, compare it with explicit copies so the movement is visible.",
+        ],
+        code: `// Unified Memory version:
+cudaMallocManaged(&x, bytes);
+kernel<<<grid, block>>>(x);
+cudaDeviceSynchronize();
+
+// Explicit-copy version:
+float* h_x = new float[n];
+float* d_x = nullptr;
+
+cudaMalloc(&d_x, bytes);
+cudaMemcpy(d_x, h_x, bytes, cudaMemcpyHostToDevice);
+kernel<<<grid, block>>>(d_x);
+cudaMemcpy(h_x, d_x, bytes, cudaMemcpyDeviceToHost);`,
+      },
+      {
+        title: "Questions to ask",
+        bullets: [
+          "Does the CPU initialize the data?",
+          "Does the GPU read it first?",
+          "Does the GPU write the result?",
+          "Does the CPU need the result?",
+          "Is there repeated CPU/GPU alternation?",
+          "Which synchronization point makes the CPU access legal?",
+        ],
+      },
+      {
+        title: "Short version",
+        paragraphs: [
+          "Wrong mental model: same pointer means free data sharing.",
+          "Correct mental model: same pointer means easier programming, but data still moves.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "correctness-first",
+    title: "Correctness Comes Before Optimization",
+    trapTitle: "Correctness deferred until after optimization",
+    summary:
+      "A CUDA optimization is only meaningful after a CPU reference and a simple CUDA baseline prove what correct output means.",
+    sourceIds: ["programming-guide", "best-practices", "compute-sanitizer"],
+    sections: [
+      {
+        title: "What this mistake means",
+        paragraphs: [
+          "The mistake is starting with an optimized CUDA kernel before proving that the simple version is correct. It feels productive to add shared memory, tiling, streams, vectorized loads, loop unrolling, fused operations, complicated indexing, and multiple kernels.",
+          "When the output is wrong, the debugging surface becomes too large. The bug could be in the algorithm, CUDA indexing, memory allocation, copies, shared-memory tile, synchronization, boundary conditions, floating-point tolerance, stream ordering, or race conditions.",
+        ],
+      },
+      {
+        title: "Correct order of development",
+        bullets: [
+          "Write the CPU reference.",
+          "Write the naive CUDA kernel.",
+          "Compare CUDA output against CPU output.",
+          "Add timing.",
+          "Optimize one thing at a time.",
+          "Compare again after every optimization.",
+        ],
+      },
+      {
+        title: "CPU reference and naive CUDA baseline",
+        paragraphs: [
+          "The CPU reference is the contract. The naive CUDA kernel is the first GPU baseline. For vector addition, one thread owns one output element and uses a bounds guard.",
+        ],
+        code: `void vector_add_cpu(const float* a, const float* b, float* c, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        c[i] = a[i] + b[i];
+    }
+}
+
+__global__ void vector_add_gpu(const float* a,
+                               const float* b,
+                               float* c,
+                               int n)
+{
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        c[i] = a[i] + b[i];
+    }
+}`,
+      },
+      {
+        title: "Mismatch reporting",
+        paragraphs: [
+          "A correctness harness does not need to be elaborate at first. It needs to tell you where the first mismatch is and how large the difference is.",
+        ],
+        code: `for (int i = 0; i < n; ++i) {
+    float diff = std::abs(c_cpu[i] - c_gpu[i]);
+    if (diff > 1e-5f) {
+        std::cout << "Mismatch at " << i
+                  << ": CPU = " << c_cpu[i]
+                  << ", GPU = " << c_gpu[i]
+                  << ", diff = " << diff
+                  << "\\n";
+        break;
+    }
+}`,
+      },
+      {
+        title: "Why the naive CUDA kernel matters",
+        paragraphs: [
+          "The optimized CUDA version should be compared against the CPU result for correctness and against the naive CUDA result for performance improvement.",
+          "For matrix multiplication, the CPU reference defines C[i][j] as the sum over k. The naive CUDA version might assign one thread to one C[i][j] and read A and B directly from global memory. Only after that is correct should shared-memory tiling, coalesced loads, thread blocking, or Tensor Core paths enter the experiment.",
+        ],
+      },
+      {
+        title: "Floating-point warning",
+        paragraphs: [
+          "CPU and GPU results may not be bit-identical. This is especially true for reductions, matrix multiplication, and sums because floating-point addition is not associative.",
+          "Do not usually compare floats with ==. Use an absolute and relative tolerance that matches the operation.",
+        ],
+        code: `bool close(float x, float y)
+{
+    float abs_err = std::abs(x - y);
+    float scale = std::max(std::abs(x), std::abs(y));
+    float rel_err = scale == 0.0f ? abs_err : abs_err / scale;
+
+    return abs_err < 1e-5f || rel_err < 1e-5f;
+}`,
+      },
+      {
+        title: "Better development loop",
+        code: `CPU reference correct?
+        |
+        v
+Naive CUDA correct?
+        |
+        v
+Naive CUDA timed?
+        |
+        v
+One optimization added
+        |
+        v
+Still correct?
+        |
+        v
+Faster?
+        |
+        v
+Keep or revert`,
+        paragraphs: [
+          "This prevents you from accumulating five optimizations and then discovering that the output has been wrong since the first change.",
+          "The habit is simple: Make it correct. Make it measurable. Then make it fast.",
+        ],
+      },
+    ],
+  },
+];

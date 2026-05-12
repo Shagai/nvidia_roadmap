@@ -99,6 +99,11 @@ Timing: CPU=?, H2D=?, kernel=?, D2H=?, total GPU=?`}</CodeBlock>
                 <strong>Why it happens:</strong> {trap.whyItHappens}
               </p>
               <DetailList title="Correction" items={trap.correction} />
+              {trap.deepDivePath ? (
+                <Link className="cuda-kb-deep-link" to={trap.deepDivePath}>
+                  Open deep dive
+                </Link>
+              ) : null}
             </article>
           ))}
         </div>

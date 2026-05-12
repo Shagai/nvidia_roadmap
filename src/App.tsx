@@ -4,6 +4,7 @@ import { CudaKnowledgeBasePage } from "./pages/CudaKnowledgeBasePage";
 import { CudaLabPage } from "./pages/CudaLabPage";
 import { CudaLaunchConfigurationPage } from "./pages/CudaLaunchConfigurationPage";
 import { CudaMentalModelPage } from "./pages/CudaMentalModelPage";
+import { CudaMentalModelTrapPage } from "./pages/CudaMentalModelTrapPage";
 import { DiaryPage } from "./pages/DiaryPage";
 import { ExportPage } from "./pages/ExportPage";
 import { HomePage } from "./pages/HomePage";
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
         <Route path="cuda-kb" element={<CudaKnowledgeBasePage />} />
         <Route path="cuda-kb/mental-model" element={<CudaMentalModelPage />} />
+        <Route path="cuda-kb/mental-model/traps/:trapSlug" element={<CudaMentalModelTrapPage />} />
         <Route path="cuda-kb/execution-model" element={<CudaLaunchConfigurationPage />} />
         <Route path="cuda-kb/launch-configuration" element={<CudaLaunchConfigurationPage />} />
         <Route path="skill-map" element={<SkillMapPage />} />
