@@ -4,6 +4,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import {
   CudaLaunchGeometryFigure,
   CudaOccupancyExplorer,
+  CudaWarpDivergenceFigure,
 } from "../components/CudaLaunchConfigurationFigures";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
@@ -170,6 +171,57 @@ const executionKnowSections = [
   },
 ];
 
+const divergenceChecks = [
+  {
+    title: "Uniform decisions do not split a warp",
+    thesis:
+      "A condition that has the same truth value for every lane in a warp does not create intra-warp divergence.",
+    details: [
+      "Constants, kernel arguments, and block-level choices can be uniform for all lanes.",
+      "A condition can mention threadIdx.x and still be warp-uniform if it changes only at warp boundaries.",
+      "For example, threadIdx.x < 32 is uniform for warp 0 and uniform for later warps in a normal 1D block.",
+    ],
+    diagnostic:
+      "Evaluate the predicate for lanes 0 through 31 inside one warp before calling it divergent.",
+  },
+  {
+    title: "Lane-dependent predicates can diverge",
+    thesis:
+      "Raw comparisons against threadIdx.x, global thread id, or per-thread data often produce different answers inside the same warp.",
+    details: [
+      "if (threadIdx.x > 2) splits the first warp because lanes 0, 1, and 2 disagree with lanes 3 through 31.",
+      "if (i % 2 == 0) splits every ordinary warp into even and odd lanes.",
+      "Data-dependent tests such as if (a[i] > threshold) can diverge whenever neighboring elements differ.",
+    ],
+    diagnostic:
+      "Look for predicates that depend on lane id or on values loaded through a lane-specific index.",
+  },
+  {
+    title: "Boundary guards are normal",
+    thesis:
+      "The common if (i < n) guard may diverge in the final partial block, but it is usually the cleanest correctness tradeoff.",
+    details: [
+      "Ceiling division launches enough threads to cover arbitrary input sizes.",
+      "Extra threads in the final block must skip memory accesses outside the valid range.",
+      "With n = 1003 and block = 256, the final block has 235 useful threads and 21 guard threads.",
+    ],
+    diagnostic:
+      "Treat final-block divergence as expected unless profiling shows it matters for the workload.",
+  },
+  {
+    title: "Loops diverge through their exit condition",
+    thesis:
+      "A loop can diverge when its trip count is based on thread index or data owned by each lane.",
+    details: [
+      "int limit = a[threadIdx.x] gives each lane a potentially different number of loop iterations.",
+      "The warp continues until the largest active trip count finishes.",
+      "Lanes with smaller trip counts become inactive for the remaining iterations.",
+    ],
+    diagnostic:
+      "Inspect the loop condition the same way you inspect an if condition: ask whether every lane sees the same answer.",
+  },
+];
+
 const executionPractice = [
   {
     title: "Create a launch ledger",
@@ -249,6 +301,7 @@ const executionTraps = [
     whyItHappens:
       "Threads are exposed individually, but warp lanes execute together when they are active on the same instruction path.",
     correction: [
+      "Inspect whether each branch or loop condition is uniform across lanes in the same warp.",
       "Keep common branch decisions aligned across neighboring lanes when possible.",
       "Use profiler stall and branch metrics before rewriting the algorithm.",
     ],
@@ -303,6 +356,18 @@ const executionInterviewAnswers = [
     ],
     evidenceToCollect: "A kernel variant that logs grid size, stride, and total elements covered.",
   },
+  {
+    prompt: "How do you tell whether a branch or loop can cause thread divergence?",
+    shortAnswer:
+      "Inspect the decision condition. If lanes in the same warp can evaluate it differently, the warp may have to serialize multiple paths or loop masks.",
+    deepAnswer: [
+      "Predicates based directly on threadIdx.x, global thread id, or per-thread data can be lane-dependent.",
+      "A boundary guard such as if (i < n) is expected and usually only affects the last partially useful warp.",
+      "Loops diverge when different lanes have different exit iterations, so the warp runs until the longest active lane finishes.",
+    ],
+    evidenceToCollect:
+      "A small lane table for one warp plus branch-efficiency or warp-state metrics from a profiler report.",
+  },
 ];
 
 export function CudaLaunchConfigurationPage() {
@@ -318,6 +383,7 @@ export function CudaLaunchConfigurationPage() {
         { id: "know", label: "Know" },
         { id: "sms", label: "Blocks vs SMs" },
         { id: "warps", label: "Why 256" },
+        { id: "divergence", label: "Divergence" },
         { id: "occupancy", label: "Occupancy" },
         { id: "practice", label: "Practice" },
         { id: "traps", label: "Traps" },
@@ -468,6 +534,60 @@ dim3 block(16, 16); // 256 threads
 dim3 grid((width  + block.x - 1) / block.x,
           (height + block.y - 1) / block.y);
 kernel2D<<<grid, block>>>(...);`}</CodeBlock>
+      </Section>
+
+      <Section
+        id="divergence"
+        title="Thread divergence"
+        note="Divergence is a warp-level question. Inspect one warp's lanes, not only the source line."
+      >
+        <p>
+          A control construct can cause thread divergence when its decision condition can evaluate
+          differently for lanes in the same warp. Branches are the obvious case, but loops follow the
+          same rule: if the loop condition depends on a lane-varying value, some lanes can keep
+          iterating while others become inactive.
+        </p>
+        <CodeBlock>{`// Diverges in the first warp: lanes 0, 1, and 2 disagree with lanes 3..31.
+if (threadIdx.x > 2) {
+    do_taken_path();
+} else {
+    do_other_path();
+}
+
+// Common boundary guard. Usually only the final partial warp diverges.
+int i = blockIdx.x * blockDim.x + threadIdx.x;
+if (i < n) {
+    C[i] = A[i] + B[i];
+}
+
+// Loop divergence: each lane can have a different trip count.
+int limit = a[threadIdx.x];
+for (int k = 0; k < limit; ++k) {
+    do_work(k);
+}`}</CodeBlock>
+        <CudaWarpDivergenceFigure />
+        <div className="mental-model-section-grid">
+          {divergenceChecks.map((check) => (
+            <article className="mental-model-deep-card" key={check.title}>
+              <h3>{check.title}</h3>
+              <p className="short-answer">{check.thesis}</p>
+              <ul>
+                {check.details.map((detail) => (
+                  <li key={detail}>{detail}</li>
+                ))}
+              </ul>
+              <p className="evidence-hook">
+                <strong>Diagnostic:</strong> {check.diagnostic}
+              </p>
+            </article>
+          ))}
+        </div>
+        <Callout title="Boundary divergence is often the right tradeoff" tone="success">
+          For vector addition with <code>n = 1003</code> and <code>block = 256</code>, the launch
+          creates 1024 logical threads. The final block has 235 useful threads and 21 guard threads,
+          so only the last warp in that block is partially active. That small amount of divergence is
+          usually better than writing special-case launch code for every input length.
+        </Callout>
       </Section>
 
       <Section

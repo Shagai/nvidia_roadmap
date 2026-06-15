@@ -1618,6 +1618,116 @@ h5 {
   text-anchor: middle;
 }
 
+.divergence-example-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.divergence-example {
+  min-width: 0;
+}
+
+.divergence-example + .divergence-example {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.divergence-example h4 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.divergence-example p {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.95rem;
+  margin: 0 0 0.85rem;
+}
+
+.divergence-example code,
+.explanation-grid code {
+  background: color-mix(in srgb, var(--accent-soft), transparent 45%);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.86em;
+  padding: 0.12rem 0.3rem;
+}
+
+.warp-lane-strip {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+}
+
+.warp-lane {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: grid;
+  gap: 0.15rem;
+  justify-items: center;
+  min-height: 3rem;
+  padding: 0.35rem 0.2rem;
+}
+
+.warp-lane i {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.warp-lane b {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.92rem;
+}
+
+.warp-lane-taken {
+  background: color-mix(in srgb, var(--success), transparent 74%);
+}
+
+.warp-lane-skipped {
+  background: color-mix(in srgb, var(--warning), transparent 74%);
+}
+
+.loop-divergence-grid {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.loop-lane-column {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.loop-lane-column strong,
+.loop-lane-column span {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.loop-lane-column span {
+  color: var(--muted);
+}
+
+.loop-lane-column i {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-height: 1.05rem;
+}
+
+.loop-cell-active {
+  background: color-mix(in srgb, var(--accent), transparent 22%);
+}
+
+.loop-cell-inactive {
+  background: color-mix(in srgb, var(--border), transparent 62%);
+}
+
 .occupancy-control-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1923,6 +2033,14 @@ textarea {
   .occupancy-bar-row strong {
     text-align: left;
   }
+
+  .warp-lane-strip {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .loop-divergence-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 520px) {
@@ -1957,5 +2075,13 @@ textarea {
   .month-card,
   .portfolio-card {
     padding: 0.85rem;
+  }
+
+  .warp-lane-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .loop-divergence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
