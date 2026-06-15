@@ -1,0 +1,285 @@
+.callout {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  margin: 1.25rem 0;
+  padding: 1rem;
+}
+
+.callout strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.callout p {
+  margin: 0;
+}
+
+.callout-success {
+  border-left-color: var(--success);
+}
+
+.callout-warning {
+  border-left-color: var(--warning);
+}
+
+.progress-grid,
+.card-grid,
+.cuda-stat-grid,
+.explanation-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.progress-tile,
+.reading-card,
+.mini-card,
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.progress-tile p,
+.progress-tile span,
+.reading-card span,
+.mini-card span,
+.stat-card span {
+  color: var(--muted);
+  display: block;
+  font-size: 0.88rem;
+}
+
+.progress-tile p {
+  margin: 0;
+}
+
+.progress-tile strong {
+  display: block;
+  font-size: 1.65rem;
+  line-height: 1.2;
+  margin: 0.2rem 0;
+}
+
+.card-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card-grid.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.reading-card {
+  color: var(--text);
+  display: block;
+  text-decoration: none;
+}
+
+.reading-card strong,
+.mini-card strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.reading-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.knowledge-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.knowledge-card,
+.knowledge-block,
+.prompt-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.knowledge-card {
+  color: var(--text);
+  display: block;
+  text-decoration: none;
+}
+
+.knowledge-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.knowledge-card span {
+  color: var(--accent);
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 760;
+  margin-bottom: 0.2rem;
+}
+
+.knowledge-card strong {
+  display: block;
+  margin-bottom: 0.45rem;
+}
+
+.knowledge-card p {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.94rem;
+  margin: 0;
+}
+
+.knowledge-blocks {
+  display: grid;
+  gap: 1rem;
+}
+
+.lab-project-grid,
+.answer-grid,
+.evidence-grid,
+.reference-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.lab-project-grid {
+  grid-template-columns: 1fr;
+}
+
+.answer-grid,
+.prompt-grid {
+  grid-template-columns: 1fr;
+}
+
+.compact-labs,
+.evidence-grid,
+.reference-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.knowledge-block h3 {
+  font-size: 1.08rem;
+}
+
+.knowledge-block p,
+.knowledge-block li {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.knowledge-block .code-block-wrap {
+  margin-bottom: 0;
+}
+
+.lab-project-card,
+.answer-card,
+.evidence-card,
+.reference-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.lab-project-card header {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
+}
+
+.lab-project-card header p {
+  color: var(--accent);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 720;
+  margin: 0 0 0.35rem;
+}
+
+.lab-project-card > p,
+.answer-card p,
+.evidence-card p {
+  margin-top: 0;
+}
+
+.detail-list {
+  margin-top: 0.9rem;
+}
+
+.detail-list h4 {
+  color: var(--text);
+  font-size: 0.88rem;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.detail-list ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.short-answer {
+  background: color-mix(in srgb, var(--accent-soft), transparent 55%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  padding: 0.75rem;
+}
+
+.evidence-hook,
+.done-when {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  margin-bottom: 0;
+  padding-top: 0.75rem;
+}
+
+.reference-card {
+  color: var(--text);
+  display: grid;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
+.reference-card:hover {
+  border-color: var(--accent);
+}
+
+.reference-card span {
+  color: var(--muted);
+}
+
+.reference-card small {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.check-list {
+  display: grid;
+  gap: 0.6rem;
+  padding-left: 1.2rem;
+}
+
+.check-list.strong li::marker {
+  color: var(--success);
+}
+
+.prompt-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.prompt-card {
+  font-family: Georgia, "Times New Roman", serif;
+}

@@ -3,7 +3,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { PipelineLatencySimulator } from "../components/PipelineLatencySimulator";
 import { Section } from "../components/Section";
-import { cudaSources } from "../data/cudaKnowledgeBase";
+import { cudaSources } from "../data/cudaKnowledge";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
 const variableStorageShareUrl = "https://chatgpt.com/share/6a300f52-ebc8-83eb-a300-0806afdf9eaa";

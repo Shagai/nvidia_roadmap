@@ -3,8 +3,8 @@ import { Callout } from "../components/Callout";
 import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
-import { getMonthKnowledge, monthKnowledge } from "../data/knowledge";
-import { roadmap } from "../data/plan";
+import { roadmap } from "../data/learningPlan";
+import { getMonthKnowledge, monthKnowledge } from "../data/monthKnowledge";
 import type { InterviewPromptAnswer, KnowledgeBlock, PortfolioEvidenceDetail, PracticalLabProject } from "../types";
 
 export function MonthKnowledgePage() {

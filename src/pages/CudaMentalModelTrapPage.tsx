@@ -3,7 +3,7 @@ import { Callout } from "../components/Callout";
 import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
-import { cudaMentalModelTrapDeepDives, cudaSources } from "../data/cudaKnowledgeBase";
+import { cudaMentalModelTrapDeepDives, cudaSources } from "../data/cudaKnowledge";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
 

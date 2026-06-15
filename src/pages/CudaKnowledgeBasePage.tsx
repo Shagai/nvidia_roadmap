@@ -10,7 +10,7 @@ import {
   cudaSources,
   cudaStudyTracks,
   cudaWorkflows,
-} from "../data/cudaKnowledgeBase";
+} from "../data/cudaKnowledge";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
 

@@ -3,7 +3,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
 import { cudaFundamentalsInterviewAnswers } from "../data/cudaFundamentals";
-import { explanationDrills, interviewStories } from "../data/plan";
+import { explanationDrills, interviewStories } from "../data/learningPlan";
 
 const algorithmTopics = [
   "Arrays/strings",

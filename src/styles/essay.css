@@ -1,0 +1,144 @@
+.essay-shell {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(1rem, 1fr) minmax(0, 820px) minmax(180px, 240px) minmax(1rem, 1fr);
+  padding: 4rem 0 6rem;
+}
+
+.essay-article {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.side-toc {
+  align-self: start;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.92rem;
+  grid-column: 3;
+  padding-left: 1rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.side-toc p {
+  color: var(--text);
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.side-toc ol,
+.mobile-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-toc li,
+.mobile-toc li {
+  margin: 0.35rem 0;
+}
+
+.side-toc a,
+.mobile-toc a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.side-toc a:hover,
+.mobile-toc a:hover {
+  color: var(--accent);
+}
+
+.mobile-toc {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: none;
+  margin: 1.5rem 0;
+  padding: 0.8rem 1rem;
+}
+
+.essay-hero {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+}
+
+.eyebrow,
+.figure-kicker {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  line-height: 1.2;
+}
+
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 3rem;
+  font-weight: 520;
+  letter-spacing: 0;
+  margin: 0;
+  max-width: 12em;
+}
+
+h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.85rem;
+  font-weight: 520;
+  letter-spacing: 0;
+  margin: 0 0 1rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+h4,
+h5 {
+  margin: 0;
+}
+
+.dek {
+  color: var(--muted);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  max-width: 38em;
+}
+
+.essay-section {
+  margin: 2.8rem 0;
+  scroll-margin-top: 6rem;
+}
+
+.section-content {
+  min-width: 0;
+}
+
+.section-content p,
+.section-content li {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.06rem;
+}
+
+.margin-note {
+  background: color-mix(in srgb, var(--accent-soft), transparent 68%);
+  border-left: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: -0.25rem 0 1.15rem;
+  padding: 0.65rem 0.8rem;
+}

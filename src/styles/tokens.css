@@ -1,0 +1,63 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f4ee;
+  --text: #1f2626;
+  --muted: #65706f;
+  --accent: #006d77;
+  --accent-soft: #d6ece9;
+  --border: #d8d0c2;
+  --panel: #fffdf8;
+  --warning: #b36b00;
+  --success: #2f7d4a;
+  --danger: #b03a2e;
+  --shadow: 0 18px 45px rgba(38, 34, 27, 0.08);
+  --skill-systems: #006d77;
+  --skill-gpu: #5b6ee1;
+  --skill-performance: #b36b00;
+  --skill-ai: #8a4f9f;
+  --skill-robotics: #2f7d4a;
+  --skill-architecture: #b84c4c;
+  --skill-interview: #6f6f2b;
+  --code-bg: #272822;
+  --code-border: #3e3d32;
+  --code-text: #f8f8f2;
+  --code-comment: #75715e;
+  --code-pink: #f92672;
+  --code-green: #a6e22e;
+  --code-yellow: #e6db74;
+  --code-purple: #ae81ff;
+  --code-blue: #66d9ef;
+  --code-orange: #fd971f;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #171917;
+  --text: #f1efe7;
+  --muted: #b5bbb6;
+  --accent: #68d4cc;
+  --accent-soft: #254947;
+  --border: #3a403b;
+  --panel: #222620;
+  --warning: #f2b35d;
+  --success: #88d18a;
+  --danger: #ff8b7f;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+  --skill-systems: #68d4cc;
+  --skill-gpu: #9aa7ff;
+  --skill-performance: #f2b35d;
+  --skill-ai: #d5a6ff;
+  --skill-robotics: #88d18a;
+  --skill-architecture: #ff9f9f;
+  --skill-interview: #d8d86e;
+  --code-bg: #272822;
+  --code-border: #3e3d32;
+  --code-text: #f8f8f2;
+  --code-comment: #75715e;
+  --code-pink: #f92672;
+  --code-green: #a6e22e;
+  --code-yellow: #e6db74;
+  --code-purple: #ae81ff;
+  --code-blue: #66d9ef;
+  --code-orange: #fd971f;
+}

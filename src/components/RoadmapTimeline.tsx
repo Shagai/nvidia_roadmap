@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { roadmap } from "../data/plan";
+import { roadmap } from "../data/learningPlan";
 import { useProgress } from "../state/ProgressContext";
 import { roadmapCompletion, roadmapItemKey } from "../utils/progress";
 

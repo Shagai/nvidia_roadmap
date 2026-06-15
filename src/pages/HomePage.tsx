@@ -4,7 +4,7 @@ import { EssayLayout } from "../components/EssayLayout";
 import { ProgressSummary } from "../components/ProgressSummary";
 import { ReadingCard } from "../components/ReadingCard";
 import { Section } from "../components/Section";
-import { weeklyRhythm } from "../data/plan";
+import { weeklyRhythm } from "../data/learningPlan";
 
 export function HomePage() {
   return (

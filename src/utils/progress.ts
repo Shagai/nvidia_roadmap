@@ -1,4 +1,4 @@
-import { portfolioProjects, roadmap, skills } from "../data/plan";
+import { portfolioProjects, roadmap, skills } from "../data/learningPlan";
 import type { DiaryEntry, PortfolioProgress } from "../types";
 
 export function roadmapItemKey(monthId: string, deliverable: string) {

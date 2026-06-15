@@ -1,0 +1,149 @@
+.mental-model-section-grid,
+.mental-model-practice-grid,
+.mental-model-trap-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.mental-model-practice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.mental-model-deep-card,
+.mental-model-practice-card,
+.mental-model-trap-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.mental-model-deep-card h3,
+.mental-model-practice-card h3,
+.mental-model-trap-card h3 {
+  font-size: 1.12rem;
+}
+
+.mental-model-deep-card ul,
+.mental-model-practice-card ul,
+.mental-model-practice-card ol,
+.mental-model-trap-card ul {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.mental-model-practice-card > p,
+.mental-model-trap-card > p {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.mental-model-figure {
+  margin-top: 0.5rem;
+}
+
+.mental-model-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.boundary-diagram {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.gpu-path {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.boundary-stage {
+  align-items: center;
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: minmax(8rem, 0.45fr) minmax(8rem, 1fr) minmax(5.5rem, auto);
+}
+
+.boundary-stage span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.boundary-stage div {
+  background: color-mix(in srgb, var(--border), transparent 45%);
+  border-radius: 999px;
+  min-height: 0.65rem;
+  overflow: hidden;
+}
+
+.boundary-stage i {
+  border-radius: 999px;
+  display: block;
+  min-height: 0.65rem;
+}
+
+.boundary-stage strong {
+  font-size: 0.92rem;
+  text-align: right;
+}
+
+.boundary-stage-cpu i {
+  background: var(--skill-systems);
+}
+
+.boundary-stage-copy i {
+  background: var(--warning);
+}
+
+.boundary-stage-launch i {
+  background: var(--skill-architecture);
+}
+
+.boundary-stage-gpu i {
+  background: var(--skill-gpu);
+}
+
+.mental-model-recommendation {
+  background: color-mix(in srgb, var(--accent-soft), transparent 35%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  grid-column: 1 / -1;
+  padding: 0.75rem;
+}
+
+.rhythm-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.rhythm-table th,
+.rhythm-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.7rem 0;
+  text-align: left;
+}
+
+.rhythm-table td {
+  color: var(--muted);
+  text-align: right;
+}
+
+.two-column-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.two-column-list > div {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}

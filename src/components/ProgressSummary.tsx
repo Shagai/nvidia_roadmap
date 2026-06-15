@@ -1,4 +1,4 @@
-import { portfolioProjects } from "../data/plan";
+import { portfolioProjects } from "../data/learningPlan";
 import { useProgress } from "../state/ProgressContext";
 import {
   diaryCompletion,

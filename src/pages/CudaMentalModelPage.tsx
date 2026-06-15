@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { Callout } from "../components/Callout";
 import { CodeBlock } from "../components/CodeBlock";
 import { CudaMentalModelBoundaryFigure } from "../components/CudaMentalModelBoundaryFigure";
+import { DetailList } from "../components/DetailList";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
-import { cudaMentalModelGuide, cudaSources } from "../data/cudaKnowledgeBase";
+import { cudaMentalModelGuide, cudaSources } from "../data/cudaKnowledge";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
 
@@ -158,28 +159,5 @@ Timing: CPU=?, H2D=?, kernel=?, D2H=?, total GPU=?`}</CodeBlock>
         </p>
       </Section>
     </EssayLayout>
-  );
-}
-
-function DetailList({
-  title,
-  items,
-  ordered = false,
-}: {
-  title: string;
-  items: string[];
-  ordered?: boolean;
-}) {
-  const ListTag = ordered ? "ol" : "ul";
-
-  return (
-    <div className="detail-list">
-      <h4>{title}</h4>
-      <ListTag>
-        {items.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ListTag>
-    </div>
   );
 }

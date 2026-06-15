@@ -1,4 +1,4 @@
-import { skills } from "../data/plan";
+import { skills } from "../data/learningPlan";
 import { useProgress } from "../state/ProgressContext";
 import { readinessScore } from "../utils/progress";
 

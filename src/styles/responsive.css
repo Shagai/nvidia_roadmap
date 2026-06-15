@@ -1,0 +1,167 @@
+@media (max-width: 1120px) {
+  .essay-shell {
+    grid-template-columns: minmax(1rem, 1fr) minmax(0, 820px) minmax(1rem, 1fr);
+  }
+
+  .side-toc {
+    display: none;
+  }
+
+  .mobile-toc {
+    display: block;
+  }
+}
+
+@media (max-width: 860px) {
+  .topbar {
+    grid-template-columns: auto auto auto;
+  }
+
+  .brand span:last-child {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .primary-nav {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: none;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding: 0.75rem 0;
+  }
+
+  .primary-nav.is-open {
+    display: flex;
+  }
+
+  .essay-shell {
+    padding: 2rem 0 4rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  .progress-grid,
+  .card-grid,
+  .card-grid.compact,
+  .knowledge-grid,
+  .compact-labs,
+  .exercise-summary-grid,
+  .exercise-card-grid,
+  .answer-grid,
+  .evidence-grid,
+  .reference-grid,
+  .prompt-grid,
+  .cuda-kb-track-grid,
+  .cuda-kb-workflow-grid,
+  .cuda-glossary-grid,
+  .memory-scope-grid,
+  .mental-model-practice-grid,
+  .mental-model-stat-grid,
+  .roofline-case-grid,
+  .skill-map-grid,
+  .month-columns,
+  .control-grid,
+  .cuda-stat-grid,
+  .planner-stat-grid,
+  .launch-stat-grid,
+  .explanation-grid,
+  .latency-grid,
+  .two-column-list,
+  .occupancy-control-grid,
+  .launch-pattern-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .month-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .figure-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .readiness-score {
+    text-align: left;
+  }
+
+  .boundary-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .boundary-stage strong {
+    text-align: left;
+  }
+
+  .occupancy-bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .occupancy-bar-row strong {
+    text-align: left;
+  }
+
+  .scheduler-diagram,
+  .scheduler-step {
+    grid-template-columns: 1fr;
+  }
+
+  .warp-lane-strip {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .loop-divergence-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .essay-shell {
+    grid-template-columns: 0.75rem minmax(0, 1fr) 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+  }
+
+  .dek {
+    font-size: 1.05rem;
+  }
+
+  .section-content p,
+  .section-content li {
+    font-size: 1rem;
+  }
+
+  .interactive-panel,
+  .progress-tile,
+  .reading-card,
+  .month-card,
+  .portfolio-card {
+    padding: 0.85rem;
+  }
+
+  .warp-lane-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .loop-divergence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

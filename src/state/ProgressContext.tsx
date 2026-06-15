@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { portfolioProjects, roadmap, skills, storageVersion } from "../data/plan";
+import { portfolioProjects, roadmap, skills, storageVersion } from "../data/learningPlan";
 import type { DiaryEntry, ExportedProgress, PortfolioProgress, PortfolioStatus } from "../types";
 
 const storageKeys = {

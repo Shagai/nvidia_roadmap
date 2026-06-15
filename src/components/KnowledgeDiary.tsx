@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { roadmap } from "../data/plan";
+import { roadmap } from "../data/learningPlan";
 import { useProgress } from "../state/ProgressContext";
 
 export function KnowledgeDiary() {

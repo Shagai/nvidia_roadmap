@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { EssayLayout } from "../components/EssayLayout";
 import { Section } from "../components/Section";
-import { monthKnowledge } from "../data/knowledge";
-import { roadmap } from "../data/plan";
+import { roadmap } from "../data/learningPlan";
+import { monthKnowledge } from "../data/monthKnowledge";
 
 export function KnowledgeIndexPage() {
   return (

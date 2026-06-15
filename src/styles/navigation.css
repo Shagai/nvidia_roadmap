@@ -1,0 +1,79 @@
+.topbar {
+  align-items: center;
+  background: color-mix(in srgb, var(--panel), transparent 5%);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0.65rem 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(16px);
+}
+
+.brand {
+  align-items: center;
+  color: var(--text);
+  display: inline-flex;
+  font-weight: 720;
+  gap: 0.65rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  align-items: center;
+  background: var(--accent);
+  border-radius: 6px;
+  color: var(--panel);
+  display: inline-flex;
+  font-size: 0.78rem;
+  height: 2rem;
+  justify-content: center;
+  letter-spacing: 0;
+  width: 2rem;
+}
+
+.primary-nav {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  justify-content: center;
+}
+
+.primary-nav a {
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  padding: 0.32rem 0.5rem;
+  text-decoration: none;
+}
+
+.primary-nav a.active,
+.primary-nav a:hover {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.theme-toggle,
+.nav-toggle,
+.button-row button {
+  background: var(--text);
+  border: 1px solid var(--text);
+  border-radius: 999px;
+  color: var(--panel);
+  min-height: 2.35rem;
+  padding: 0.35rem 0.8rem;
+}
+
+.nav-toggle {
+  display: none;
+}
+
+.theme-toggle {
+  background: transparent;
+  color: var(--text);
+}
