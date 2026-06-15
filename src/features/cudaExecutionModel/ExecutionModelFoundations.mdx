@@ -5,57 +5,57 @@ import { Section } from "../../components/Section";
 import { executionKnowSections } from "../../data/cudaKnowledge";
 
 <Section
-  id="frame"
-  title="The frame"
-  note="This is the execution-model layer: first make the work correct, then explain what the scheduler and hardware resources are likely doing."
+id="frame"
+title="The frame"
+note="This is the execution-model layer: first make the work correct, then explain what the scheduler and hardware resources are likely doing."
 >
-  <p>
-    The execution model connects CUDA syntax to GPU behavior. The triple-chevron launch
-    describes the logical work shape. Built-in indices make each thread responsible for a
-    precise slice of data. Warps, blocks, SM resources, and memory access patterns explain why
-    one correct launch shape can outperform another.
-  </p>
-  <Callout title="One sentence to keep nearby" tone="success">
-    Start with blockDim = 256 and gridDim = ceil(problem_size / 256), prove the indexing and
-    guard are correct, then tune with block-size sweeps, occupancy evidence, and profiler
-    metrics.
-  </Callout>
+
+  The execution model connects CUDA syntax to GPU behavior. The triple-chevron launch
+  describes the logical work shape. Built-in indices make each thread responsible for a
+  precise slice of data. Warps, blocks, SM resources, and memory access patterns explain why
+  one correct launch shape can outperform another.
+
+<Callout title="One sentence to keep nearby" tone="success">
+  Start with blockDim = 256 and gridDim = ceil(problem_size / 256), prove the indexing and
+  guard are correct, then tune with block-size sweeps, occupancy evidence, and profiler
+  metrics.
+</Callout>
 </Section>
 
 <Section
-  id="syntax"
-  title="Triple-chevron syntax"
-  note="Most beginner code only needs the first two launch parameters. The third and fourth matter when dynamic shared memory or streams enter the design."
+id="syntax"
+title="Triple-chevron syntax"
+note="Most beginner code only needs the first two launch parameters. The third and fourth matter when dynamic shared memory or streams enter the design."
 >
-  <p>
-    A CUDA kernel launch uses an execution configuration before the argument list. In everyday
-    code, the first value controls how many blocks are launched and the second value controls
-    how many threads each block contains.
-  </p>
-  <CodeBlock>{`kernel<<<gridDim, blockDim, dynamicSharedMemoryBytes, stream>>>(args...);
+
+  A CUDA kernel launch uses an execution configuration before the argument list. In everyday
+  code, the first value controls how many blocks are launched and the second value controls
+  how many threads each block contains.
+
+<CodeBlock>{`kernel<<<gridDim, blockDim, dynamicSharedMemoryBytes, stream>>>(args...);
 
 vecAddKernel<<<ceil(n / 256.0), 256>>>(A_d, B_d, C_d, n);
 
 // Equivalent launch intent:
 gridDim  = ceil(n / 256.0); // number of blocks
 blockDim = 256;             // threads per block`}</CodeBlock>
-  <Callout title="Mental model" tone="success">
-    gridDim is how many independent blocks of work exist. blockDim is how many threads
-    cooperate inside each block.
-  </Callout>
+<Callout title="Mental model" tone="success">
+  gridDim is how many independent blocks of work exist. blockDim is how many threads
+  cooperate inside each block.
+</Callout>
 </Section>
 
 <Section
-  id="coverage"
-  title="Covering all elements"
-  note="The last block often contains extra threads. That is normal; the bounds guard makes the launch work for arbitrary sizes."
+id="coverage"
+title="Covering all elements"
+note="The last block often contains extra threads. That is normal; the bounds guard makes the launch work for arbitrary sizes."
 >
-  <p>
-    For a simple vector kernel, each thread owns one output element. The launch therefore needs
-    at least <code>n</code> logical threads, plus a guard because <code>n</code> is rarely an
-    exact multiple of the block size.
-  </p>
-  <CodeBlock>{`__global__ void vecAddKernel(const float* A,
+
+  For a simple vector kernel, each thread owns one output element. The launch therefore needs
+  at least <code>n</code> logical threads, plus a guard because <code>n</code> is rarely an
+  exact multiple of the block size.
+
+<CodeBlock>{`__global__ void vecAddKernel(const float* A,
                              const float* B,
                              float* C,
                              int n)
@@ -69,71 +69,70 @@ blockDim = 256;             // threads per block`}</CodeBlock>
 int block = 256;
 int grid  = (n + block - 1) / block;
 vecAddKernel<<<grid, block>>>(A_d, B_d, C_d, n);`}</CodeBlock>
-  <CudaLaunchGeometryFigure />
+<CudaLaunchGeometryFigure />
 </Section>
 
 <Section id="know" title="Know">
-  <div className="mental-model-section-grid">
-    {executionKnowSections.map((section) => (
-      <article className="mental-model-deep-card" key={section.title}>
-        <h3>{section.title}</h3>
-        <p className="short-answer">{section.thesis}</p>
-        <ul>
-          {section.details.map((detail) => (
-            <li key={detail}>{detail}</li>
-          ))}
-        </ul>
-        <p className="evidence-hook">
-          <strong>Diagnostic:</strong> {section.diagnostic}
-        </p>
-      </article>
-    ))}
-  </div>
+<div className="mental-model-section-grid">
+  {executionKnowSections.map((section) => (
+    <article className="mental-model-deep-card" key={section.title}>
+      <h3>{section.title}</h3>
+      <div className="short-answer">{section.thesis}</div>
+      <ul>
+        {section.details.map((detail) => (
+          <li key={detail}>{detail}</li>
+        ))}
+      </ul>
+      <div className="evidence-hook">
+        <strong>Diagnostic:</strong> {section.diagnostic}
+      </div>
+    </article>
+  ))}
+</div>
 </Section>
 
 <Section
-  id="sms"
-  title="Blocks are not SMs"
-  note="Only persistent kernels and some work-queue designs usually tie grid size intentionally to SM count."
+id="sms"
+title="Blocks are not SMs"
+note="Only persistent kernels and some work-queue designs usually tie grid size intentionally to SM count."
 >
-  <p>
-    A common beginner mistake is launching one block per streaming multiprocessor. Ordinary
-    data-parallel kernels usually launch many more blocks than the GPU has SMs. The scheduler
-    places blocks onto SMs in waves, and different thread blocks do not have a guaranteed order.
-  </p>
-  <div className="two-column-list">
-    <div>
-      <h3>Normal data-parallel kernel</h3>
-      <p>
-        Make enough independent blocks to cover the data. Millions of blocks are valid if the
-        problem size demands it.
-      </p>
-    </div>
-    <div>
-      <h3>Persistent kernel</h3>
-      <p>
-        Sometimes launch <code>SM_count * k</code> blocks and let each block pull work from a
-        queue. This is a deliberate advanced pattern, not the default.
-      </p>
-    </div>
+
+  A common beginner mistake is launching one block per streaming multiprocessor. Ordinary
+  data-parallel kernels usually launch many more blocks than the GPU has SMs. The scheduler
+  places blocks onto SMs in waves, and different thread blocks do not have a guaranteed order.
+<div className="two-column-list">
+  <div>
+    <h3>Normal data-parallel kernel</h3>
+
+      Make enough independent blocks to cover the data. Millions of blocks are valid if the
+      problem size demands it.
+
   </div>
+  <div>
+    <h3>Persistent kernel</h3>
+
+      Sometimes launch <code>SM_count * k</code> blocks and let each block pull work from a
+      queue. This is a deliberate advanced pattern, not the default.
+
+  </div>
+</div>
 </Section>
 
 <Section
-  id="warps"
-  title="Why 256 is common"
-  note="NVIDIA hardware executes threads in warps. The current compute-capability tables still list a warp size of 32, while other resource limits vary by architecture."
+id="warps"
+title="Why 256 is common"
+note="NVIDIA hardware executes threads in warps. The current compute-capability tables still list a warp size of 32, while other resource limits vary by architecture."
 >
-  <p>
-    A thread block is partitioned into warps, and a warp contains 32 lanes on current CUDA
-    architectures. Choose block sizes that are multiples of 32 so the final warp is not partly
-    unused. Common 1D starting points are 64, 128, 256, 512, and sometimes 1024.
-  </p>
-  <Callout title="Why 256 survives as a baseline" tone="success">
-    256 threads per block is 8 warps. That is usually enough warps to help hide latency while
-    leaving room for more than one block per SM when registers and shared memory allow it.
-  </Callout>
-  <CodeBlock>{`// First CUDA baseline for a 1D data-parallel kernel:
+
+  A thread block is partitioned into warps, and a warp contains 32 lanes on current CUDA
+  architectures. Choose block sizes that are multiples of 32 so the final warp is not partly
+  unused. Common 1D starting points are 64, 128, 256, 512, and sometimes 1024.
+
+<Callout title="Why 256 survives as a baseline" tone="success">
+  256 threads per block is 8 warps. That is usually enough warps to help hide latency while
+  leaving room for more than one block per SM when registers and shared memory allow it.
+</Callout>
+<CodeBlock>{`// First CUDA baseline for a 1D data-parallel kernel:
 int block = 256;
 int grid  = (n + block - 1) / block;
 kernel<<<grid, block>>>(...);

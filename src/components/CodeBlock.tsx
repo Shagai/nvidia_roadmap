@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Children, isValidElement, useState } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const keywords = new Set([
   "__global__",
@@ -65,12 +66,13 @@ type CodeToken = {
   className?: string;
 };
 
-export function CodeBlock({ children }: { children: string }) {
+export function CodeBlock({ children }: { children: ReactNode }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const code = childrenToCode(children);
 
   async function copyCode() {
     try {
-      await navigator.clipboard.writeText(children);
+      await navigator.clipboard.writeText(code);
       setCopyState("copied");
     } catch {
       setCopyState("failed");
@@ -86,7 +88,7 @@ export function CodeBlock({ children }: { children: string }) {
       </button>
       <pre className="code-block">
         <code>
-          {children.split("\n").map((line, lineIndex) => (
+          {code.split("\n").map((line, lineIndex) => (
             <span className="code-line" key={`${line}-${lineIndex}`}>
               {tokenizeLine(line).map((token, tokenIndex) => (
                 <span className={token.className} key={`${token.text}-${tokenIndex}`}>
@@ -99,6 +101,23 @@ export function CodeBlock({ children }: { children: string }) {
       </pre>
     </div>
   );
+}
+
+function childrenToCode(children: ReactNode): string {
+  return Children.toArray(children)
+    .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
+
+      if (isValidElement(child)) {
+        const element = child as ReactElement<{ children?: ReactNode }>;
+        return childrenToCode(element.props.children);
+      }
+
+      return "";
+    })
+    .join("");
 }
 
 function tokenizeLine(line: string): CodeToken[] {
