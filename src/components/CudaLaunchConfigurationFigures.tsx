@@ -6,6 +6,43 @@ type OccupancyProfileId = "balanced" | "wide" | "large-smem";
 const blockSizes: BlockSize[] = [64, 128, 256, 512, 1024];
 const warpLanes = Array.from({ length: 32 }, (_, lane) => lane);
 const divergentLoopTripCounts = [8, 6, 7, 4, 5, 6, 8, 7];
+const schedulerTimeline = [
+  {
+    cycle: "Cycle 0",
+    warp: "Warp 0",
+    instruction: "global load",
+    state: "Stalls waiting for memory",
+    tone: "stall",
+  },
+  {
+    cycle: "Cycle 1",
+    warp: "Warp 1",
+    instruction: "integer math",
+    state: "Ready, so it issues",
+    tone: "ready",
+  },
+  {
+    cycle: "Cycle 2",
+    warp: "Warp 2",
+    instruction: "FP32 math",
+    state: "Ready, so it issues",
+    tone: "ready",
+  },
+  {
+    cycle: "Cycle 3",
+    warp: "Warp 3",
+    instruction: "global load",
+    state: "Also stalls on memory",
+    tone: "stall",
+  },
+  {
+    cycle: "Later",
+    warp: "Warp 0",
+    instruction: "use loaded value",
+    state: "Memory returned; warp is ready again",
+    tone: "return",
+  },
+];
 
 const problemPresets = [
   { label: "1,000 elements", value: 1_000 },
@@ -278,6 +315,60 @@ export function CudaOccupancyExplorer() {
         <p>
           <strong>Performance rule:</strong> higher occupancy can hide latency, but memory access,
           register pressure, shared-memory reuse, and instruction mix still decide the benchmark.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function CudaWarpSchedulingFigure() {
+  return (
+    <div className="interactive-panel launch-figure-panel scheduler-panel">
+      <div className="figure-header">
+        <div>
+          <p className="figure-kicker">Visual model</p>
+          <h3>Latency is hidden by issuing another ready warp</h3>
+        </div>
+        <div className="quality-pill quality-strong">ready-warp selection</div>
+      </div>
+
+      <div className="scheduler-diagram">
+        <section className="scheduler-queue" aria-labelledby="ready-queue-title">
+          <h4 id="ready-queue-title">Resident warp pool</h4>
+          <p>The scheduler can choose only from warps already resident on the SM.</p>
+          <div className="warp-pool" aria-label="Resident warp readiness">
+            <span className="warp-token warp-token-stalled">Warp 0 stalled</span>
+            <span className="warp-token warp-token-ready">Warp 1 ready</span>
+            <span className="warp-token warp-token-ready">Warp 2 ready</span>
+            <span className="warp-token warp-token-stalled">Warp 3 stalled</span>
+            <span className="warp-token warp-token-ready">Warp 4 ready</span>
+            <span className="warp-token warp-token-ready">Warp 5 ready</span>
+          </div>
+        </section>
+
+        <section className="scheduler-timeline" aria-labelledby="scheduler-timeline-title">
+          <h4 id="scheduler-timeline-title">Issue timeline</h4>
+          <div className="scheduler-timeline-rows">
+            {schedulerTimeline.map((item) => (
+              <article className={`scheduler-step scheduler-step-${item.tone}`} key={`${item.cycle}-${item.warp}`}>
+                <strong>{item.cycle}</strong>
+                <span>{item.warp}</span>
+                <b>{item.instruction}</b>
+                <em>{item.state}</em>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="explanation-grid">
+        <p>
+          <strong>Scheduling rule:</strong> an SM issues instructions from ready resident warps; a
+          stalled warp simply leaves the scheduler looking for another ready warp.
+        </p>
+        <p>
+          <strong>Latency rule:</strong> the memory operation is not faster. The waiting time is hidden
+          only if enough other warps can do useful work.
         </p>
       </div>
     </div>

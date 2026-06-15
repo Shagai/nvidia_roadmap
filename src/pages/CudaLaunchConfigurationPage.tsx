@@ -4,6 +4,7 @@ import { CodeBlock } from "../components/CodeBlock";
 import {
   CudaLaunchGeometryFigure,
   CudaOccupancyExplorer,
+  CudaWarpSchedulingFigure,
   CudaWarpDivergenceFigure,
 } from "../components/CudaLaunchConfigurationFigures";
 import { EssayLayout } from "../components/EssayLayout";
@@ -11,6 +12,22 @@ import { Section } from "../components/Section";
 import { cudaSources } from "../data/cudaKnowledgeBase";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
+const sharedExplanationSources = [
+  {
+    id: "chatgpt-thread-divergence",
+    label: "ChatGPT share: Thread Divergence in CUDA",
+    url: "https://chatgpt.com/share/6a300586-5dfc-83eb-b328-4120004d4fc2",
+    scope: "User-shared explanation used for the thread-divergence notes and visual model.",
+    checked: "2026-06-15",
+  },
+  {
+    id: "chatgpt-warp-scheduling",
+    label: "ChatGPT share: Warp Scheduling and Latency",
+    url: "https://chatgpt.com/share/6a30089d-1fd4-83eb-a09c-0cc5286ff763",
+    scope: "User-shared explanation used for the warp-scheduling and latency-tolerance notes.",
+    checked: "2026-06-15",
+  },
+];
 
 const firstChoices = [
   {
@@ -222,6 +239,57 @@ const divergenceChecks = [
   },
 ];
 
+const schedulingChecks = [
+  {
+    title: "The scheduler issues warps",
+    thesis:
+      "CUDA code exposes threads, but the SM scheduler chooses ready warps as the unit of issue.",
+    details: [
+      "A 256-thread block contributes 8 warps to the resident warp pool.",
+      "The scheduler does not pick an arbitrary individual thread; it issues the next instruction for a ready warp.",
+      "A warp is ready when its next instruction has no unresolved dependency, wait, or synchronization block.",
+    ],
+    diagnostic:
+      "When explaining a stall, ask which resident warps were still eligible to issue.",
+  },
+  {
+    title: "A stalled warp is skipped temporarily",
+    thesis:
+      "When a warp waits on global memory, an instruction dependency, or a barrier, the scheduler can issue another ready warp.",
+    details: [
+      "The stalled warp remains resident on the SM.",
+      "The SM does not need to save and restore a CPU-style heavyweight thread context.",
+      "When the dependency resolves, that warp can become eligible again.",
+    ],
+    diagnostic:
+      "A memory load hurts most when many resident warps stall at the same time and no ready warp remains.",
+  },
+  {
+    title: "Latency tolerance hides waiting",
+    thesis:
+      "Latency tolerance means doing other warp work while one warp waits; it does not make the slow operation itself faster.",
+    details: [
+      "Global memory can take far longer than simple arithmetic.",
+      "The GPU tolerates that delay by keeping many independent warps available.",
+      "If there is no other eligible warp, the SM still goes idle.",
+    ],
+    diagnostic:
+      "Separate the latency of one operation from the throughput of the whole SM.",
+  },
+  {
+    title: "Occupancy supplies choices",
+    thesis:
+      "Occupancy matters because resident warps are the scheduler's menu for hiding stalls.",
+    details: [
+      "Higher occupancy can improve latency hiding when the workload has long waits.",
+      "Occupancy can be limited by threads, warps, block slots, registers, or shared memory.",
+      "Beyond enough eligible warps, more occupancy may add no benefit if another bottleneck dominates.",
+    ],
+    diagnostic:
+      "Read achieved occupancy together with eligible-warps, stall reasons, memory throughput, and instruction mix.",
+  },
+];
+
 const executionPractice = [
   {
     title: "Create a launch ledger",
@@ -368,6 +436,18 @@ const executionInterviewAnswers = [
     evidenceToCollect:
       "A small lane table for one warp plus branch-efficiency or warp-state metrics from a profiler report.",
   },
+  {
+    prompt: "What are warp scheduling and latency tolerance?",
+    shortAnswer:
+      "Warp scheduling is the SM choosing a ready resident warp to issue next. Latency tolerance is hiding a stalled warp's wait by issuing other ready warps.",
+    deepAnswer: [
+      "A warp can be not ready because it is waiting on global memory, a dependency, or synchronization.",
+      "The stalled warp remains resident; when its dependency resolves, it can become ready again.",
+      "Occupancy matters because more resident warps give the scheduler more chances to find useful work.",
+    ],
+    evidenceToCollect:
+      "Nsight Compute warp-state and occupancy metrics showing whether the scheduler had eligible warps during stalls.",
+  },
 ];
 
 export function CudaLaunchConfigurationPage() {
@@ -383,6 +463,7 @@ export function CudaLaunchConfigurationPage() {
         { id: "know", label: "Know" },
         { id: "sms", label: "Blocks vs SMs" },
         { id: "warps", label: "Why 256" },
+        { id: "scheduling", label: "Scheduling" },
         { id: "divergence", label: "Divergence" },
         { id: "occupancy", label: "Occupancy" },
         { id: "practice", label: "Practice" },
@@ -537,6 +618,58 @@ kernel2D<<<grid, block>>>(...);`}</CodeBlock>
       </Section>
 
       <Section
+        id="scheduling"
+        title="Warp scheduling and latency tolerance"
+        note="The scheduler hides waits by switching to ready resident warps. It does not make a slow memory operation faster."
+      >
+        <p>
+          An SM executes work by issuing instructions from ready warps. When one warp reaches a long
+          wait, such as a global-memory load, the scheduler can choose another resident warp whose
+          next instruction is ready. This is the central CUDA latency-hiding mechanism: keep enough
+          independent warps available so the SM can do useful work while some warps are waiting.
+        </p>
+        <p className="source-note">
+          Source note:{" "}
+          <a href="https://chatgpt.com/share/6a30089d-1fd4-83eb-a09c-0cc5286ff763">
+            ChatGPT share, Warp Scheduling and Latency
+          </a>
+        </p>
+        <CodeBlock>{`// Hardware-level mental model, not literal scheduler order:
+cycle 0: issue Warp 0 instruction
+         Warp 0 loads from global memory and stalls
+
+cycle 1: issue Warp 1 instruction
+cycle 2: issue Warp 2 instruction
+cycle 3: issue Warp 3 instruction
+
+later:   Warp 0's memory data is ready
+         Warp 0 becomes eligible to issue again`}</CodeBlock>
+        <CudaWarpSchedulingFigure />
+        <div className="mental-model-section-grid">
+          {schedulingChecks.map((check) => (
+            <article className="mental-model-deep-card" key={check.title}>
+              <h3>{check.title}</h3>
+              <p className="short-answer">{check.thesis}</p>
+              <ul>
+                {check.details.map((detail) => (
+                  <li key={detail}>{detail}</li>
+                ))}
+              </ul>
+              <p className="evidence-hook">
+                <strong>Diagnostic:</strong> {check.diagnostic}
+              </p>
+            </article>
+          ))}
+        </div>
+        <Callout title="Why this changes how you read performance" tone="success">
+          A single memory load can still take hundreds of cycles. The performance question is whether
+          the SM had other eligible warps to issue during that wait. This is why occupancy, register
+          pressure, shared-memory use, and independent work all show up in the same tuning
+          conversation.
+        </Callout>
+      </Section>
+
+      <Section
         id="divergence"
         title="Thread divergence"
         note="Divergence is a warp-level question. Inspect one warp's lanes, not only the source line."
@@ -546,6 +679,12 @@ kernel2D<<<grid, block>>>(...);`}</CodeBlock>
           differently for lanes in the same warp. Branches are the obvious case, but loops follow the
           same rule: if the loop condition depends on a lane-varying value, some lanes can keep
           iterating while others become inactive.
+        </p>
+        <p className="source-note">
+          Source note:{" "}
+          <a href="https://chatgpt.com/share/6a300586-5dfc-83eb-b328-4120004d4fc2">
+            ChatGPT share, Thread Divergence in CUDA
+          </a>
         </p>
         <CodeBlock>{`// Diverges in the first warp: lanes 0, 1, and 2 disagree with lanes 3..31.
 if (threadIdx.x > 2) {
@@ -842,9 +981,10 @@ vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
 
       <Section
         id="sources"
-        title="Official source anchors"
-        note="Recheck these before updating generation-specific claims or architecture tables."
+        title="Source anchors"
+        note="Official references cover stable CUDA behavior. The shared ChatGPT notes are included because they were used as the teaching-source prompts for these page additions."
       >
+        <h3>Official references</h3>
         <div className="reference-grid">
           {[
             "programming-guide",
@@ -867,6 +1007,16 @@ vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
               </a>
             );
           })}
+        </div>
+        <h3>Shared explanation notes</h3>
+        <div className="reference-grid">
+          {sharedExplanationSources.map((source) => (
+            <a className="reference-card" href={source.url} key={source.id}>
+              <strong>{source.label}</strong>
+              <span>{source.scope}</span>
+              <small>Checked {source.checked}</small>
+            </a>
+          ))}
         </div>
       </Section>
     </EssayLayout>
