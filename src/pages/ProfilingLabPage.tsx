@@ -6,7 +6,72 @@ import { Section } from "../components/Section";
 import { cudaSources } from "../data/cudaKnowledgeBase";
 
 const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
+const variableStorageShareUrl = "https://chatgpt.com/share/6a300f52-ebc8-83eb-a300-0806afdf9eaa";
 const rooflineShareUrl = "https://chatgpt.com/share/6a300c8f-2988-83ed-b184-463a4348da2e";
+
+const cudaMemoryTypes = [
+  {
+    declaration: "Automatic scalar variables",
+    example: "int i; float x;",
+    memory: "Register",
+    scope: "Thread",
+    lifetime: "Kernel launch",
+    note: "Normal per-thread locals usually live in registers. Every thread has its own copy.",
+  },
+  {
+    declaration: "Automatic array variables",
+    example: "float temp[16];",
+    memory: "Local",
+    scope: "Thread",
+    lifetime: "Kernel launch",
+    note: "Local memory is still private to one thread. It is not shared memory and may be backed by device memory.",
+  },
+  {
+    declaration: "Shared variables",
+    example: "__shared__ float tile[256];",
+    memory: "Shared",
+    scope: "Block",
+    lifetime: "Block execution",
+    note: "Threads in the same block can cooperate through this storage, usually with __syncthreads().",
+  },
+  {
+    declaration: "Device global variables",
+    example: "__device__ int counter;",
+    memory: "Global",
+    scope: "Grid",
+    lifetime: "Application",
+    note: "All blocks can see the same object. Concurrent writes need atomics or a safer reduction pattern.",
+  },
+  {
+    declaration: "Constant variables",
+    example: "__constant__ float coeff[64];",
+    memory: "Constant",
+    scope: "Grid",
+    lifetime: "Application",
+    note: "Kernels read it, the host initializes it, and broadcasts are efficient when many lanes read the same address.",
+  },
+];
+
+const memoryScopeCards = [
+  {
+    label: "Thread",
+    title: "Private copies",
+    explanation:
+      "Registers and local memory belong to one thread. Other threads cannot use that thread's automatic variables.",
+  },
+  {
+    label: "Block",
+    title: "Cooperative scratchpad",
+    explanation:
+      "Shared memory is allocated per block. It is the right place for tiles that neighboring threads reuse.",
+  },
+  {
+    label: "Grid",
+    title: "Whole-kernel visibility",
+    explanation:
+      "Global and constant variables are visible across blocks, so they need a stricter plan for writes, lifetime, and reuse.",
+  },
+];
 
 const rooflineCases = [
   {
@@ -37,10 +102,11 @@ export function ProfilingLabPage() {
     <EssayLayout
       eyebrow="Profiling and latency"
       title="GPU pipeline latency simulator"
-      dek="A practical model for thinking about end-to-end latency across CPU, copies, CUDA kernels, inference, and output."
+      dek="A practical model for thinking about end-to-end latency, CUDA memory placement, kernel bottlenecks, and output."
       toc={[
         { id: "why", label: "Why it matters" },
         { id: "simulator", label: "Simulator" },
+        { id: "memory-types", label: "Memory types" },
         { id: "roofline", label: "Roofline" },
         { id: "method", label: "Method" },
         { id: "sources", label: "Sources" },
@@ -56,6 +122,76 @@ export function ProfilingLabPage() {
 
       <Section id="simulator" title="Pipeline simulator">
         <PipelineLatencySimulator />
+      </Section>
+
+      <Section
+        id="memory-types"
+        title="CUDA memory types"
+        note="A CUDA variable declaration is also a placement and visibility decision: private to a thread, shared inside a block, or visible across the grid."
+      >
+        <p>
+          The table is a compact way to answer three questions for any CUDA variable: where does it
+          live, who can see it, and how long does it exist? That distinction matters because the
+          same kernel can use registers for private state, shared memory for block cooperation, and
+          global or constant memory for data visible across blocks.
+        </p>
+        <p className="source-note">
+          Source note:{" "}
+          <a href={variableStorageShareUrl}>ChatGPT share, CUDA Variable Storage</a>
+        </p>
+        <div className="memory-type-table-wrap">
+          <table className="memory-type-table">
+            <thead>
+              <tr>
+                <th>Variable declaration</th>
+                <th>Example</th>
+                <th>Memory</th>
+                <th>Scope</th>
+                <th>Lifetime</th>
+                <th>Practical meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cudaMemoryTypes.map((type) => (
+                <tr key={type.declaration}>
+                  <th>{type.declaration}</th>
+                  <td>
+                    <code>{type.example}</code>
+                  </td>
+                  <td>{type.memory}</td>
+                  <td>{type.scope}</td>
+                  <td>{type.lifetime}</td>
+                  <td>{type.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="memory-scope-grid">
+          {memoryScopeCards.map((item) => (
+            <article className="memory-scope-card" key={item.label}>
+              <span>{item.label}</span>
+              <h3>{item.title}</h3>
+              <p>{item.explanation}</p>
+            </article>
+          ))}
+        </div>
+        <CodeBlock>{`__constant__ float c_coeff[64];  // constant memory, grid-visible reads
+__device__ int g_counter;       // global memory, grid-visible state
+
+__global__ void kernel(float* data) {
+    int tx = threadIdx.x;          // register, private to this thread
+    float scratch[8];              // local memory if it cannot stay in registers
+    __shared__ float tile[256];    // shared memory, one tile per block
+
+    tile[tx] = data[tx];
+    __syncthreads();
+}`}</CodeBlock>
+        <Callout title="Learning rule" tone="success">
+          Do not read the word local as shared with nearby threads. In CUDA, local memory is
+          thread-private. If threads need to cooperate, the declaration you are looking for is
+          <code> __shared__</code>, and the cooperation boundary is the block.
+        </Callout>
       </Section>
 
       <Section
@@ -134,10 +270,10 @@ intensity = 1.0 / 12.0; // about 0.083 FLOP/B, usually memory-bound`}</CodeBlock
       <Section
         id="sources"
         title="Source anchors"
-        note="Keep the shared explanation link with the page so the teaching source stays visible beside the official profiling references."
+        note="Keep the shared explanation links with the page so the teaching sources stay visible beside the official CUDA and profiling references."
       >
         <div className="reference-grid">
-          {["best-practices", "nsight-systems", "nsight-compute"].map((sourceId) => {
+          {["programming-guide", "best-practices", "nsight-systems", "nsight-compute"].map((sourceId) => {
             const source = sourceById.get(sourceId);
             if (!source) return null;
 
@@ -149,6 +285,11 @@ intensity = 1.0 / 12.0; // about 0.083 FLOP/B, usually memory-bound`}</CodeBlock
               </a>
             );
           })}
+          <a className="reference-card" href={variableStorageShareUrl}>
+            <strong>ChatGPT share: CUDA Variable Storage</strong>
+            <span>User-shared explanation used for the CUDA memory type table and notes.</span>
+            <small>Checked 2026-06-15</small>
+          </a>
           <a className="reference-card" href={rooflineShareUrl}>
             <strong>ChatGPT share: Roofline Model Explanation</strong>
             <span>User-shared explanation used for the Roofline model notes and figure.</span>
