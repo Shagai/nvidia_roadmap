@@ -38,6 +38,10 @@ export function CudaLabPage() {
           <Link to="/cuda-kb/execution-model">CUDA execution model guide</Link> before running
           block-size sweeps in this lab.
         </p>
+        <p>
+          For the worked exercise set, open the{" "}
+          <Link to="/cuda-lab/exercises">solved CUDA exercises</Link> notebook.
+        </p>
       </Section>
 
       <Section

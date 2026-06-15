@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { SharedLayout } from "./components/SharedLayout";
+import { CudaExercisesPage } from "./pages/CudaExercisesPage";
 import { CudaKnowledgeBasePage } from "./pages/CudaKnowledgeBasePage";
 import { CudaLabPage } from "./pages/CudaLabPage";
 import { CudaLaunchConfigurationPage } from "./pages/CudaLaunchConfigurationPage";
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="skill-map" element={<SkillMapPage />} />
         <Route path="roadmap" element={<RoadmapPage />} />
         <Route path="cuda-lab" element={<CudaLabPage />} />
+        <Route path="cuda-lab/exercises" element={<CudaExercisesPage />} />
         <Route path="profiling-lab" element={<ProfilingLabPage />} />
         <Route path="portfolio" element={<PortfolioPage />} />
         <Route path="diary" element={<DiaryPage />} />
