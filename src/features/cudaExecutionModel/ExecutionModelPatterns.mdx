@@ -1,0 +1,167 @@
+import { Link } from "react-router-dom";
+import { CodeBlock } from "../../components/CodeBlock";
+import { Section } from "../../components/Section";
+import { executionInterviewAnswers, generationGuidance } from "../../data/cudaKnowledge";
+
+<Section id="patterns" title="Modern launch patterns">
+  <div className="launch-pattern-grid">
+    <article className="launch-pattern-card">
+      <h3>Grid-stride loop</h3>
+      <p>
+        A grid-stride loop decouples total data size from the number of launched blocks. It is
+        useful when you want a controlled number of blocks while still covering very large
+        inputs.
+      </p>
+      <CodeBlock>{`__global__ void vecAddKernel(const float* A,
+                             const float* B,
+                             float* C,
+                             int n)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+    for (int i = tid; i < n; i += stride) {
+        C[i] = A[i] + B[i];
+    }
+}
+
+cudaDeviceProp prop{};
+cudaGetDeviceProperties(&prop, 0);
+int block = 256;
+int grid = 4 * prop.multiProcessorCount;
+vecAddKernel<<<grid, block>>>(A_d, B_d, C_d, n);`}</CodeBlock>
+    </article>
+
+    <article className="launch-pattern-card">
+      <h3>Row-major 2D mapping</h3>
+      <p>
+        For row-major arrays, keep consecutive <code>threadIdx.x</code> values on consecutive
+        memory addresses when possible.
+      </p>
+      <CodeBlock>{`int x = blockIdx.x * blockDim.x + threadIdx.x;
+int y = blockIdx.y * blockDim.y + threadIdx.y;
+int idx = y * width + x;
+
+if (x < width && y < height) {
+    output[idx] = transform(input[idx]);
+}`}</CodeBlock>
+    </article>
+
+    <article className="launch-pattern-card">
+      <h3>Dynamic shared memory</h3>
+      <p>
+        Kernels that declare <code>extern __shared__</code> receive the per-block allocation
+        through the third launch parameter. Large allocations above the default per-block limit
+        require explicit opt-in with a function attribute.
+      </p>
+      <CodeBlock>{`extern __shared__ float smem[];
+
+int block = 256;
+int grid = (n + block * 2 - 1) / (block * 2);
+size_t sharedBytes = block * sizeof(float);
+
+reduceKernel<<<grid, block, sharedBytes>>>(input, partial, n);`}</CodeBlock>
+    </article>
+
+    <article className="launch-pattern-card">
+      <h3>Occupancy helper APIs</h3>
+      <p>
+        CUDA can estimate a launch configuration that reaches high occupancy. Treat that result
+        as a guide and benchmark it against nearby block sizes.
+      </p>
+      <CodeBlock>{`int minGridSize = 0;
+int blockSize = 0;
+cudaOccupancyMaxPotentialBlockSize(
+    &minGridSize,
+    &blockSize,
+    vecAddKernel,
+    0,
+    0
+);
+
+int gridSize = (n + blockSize - 1) / blockSize;
+vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
+    </article>
+  </div>
+</Section>
+
+<Section
+  id="generations"
+  title="Generation-specific guidance"
+  note="The basic launch rule stays stable; the resource envelope and advanced hardware features change."
+>
+  <p>
+    The ordinary workflow remains: use multiples of 32, start with 128 or 256, benchmark 512
+    where it makes sense, and avoid 1024 unless measurement supports it. What changes across
+    compute capabilities is the resident-resource envelope and availability of advanced
+    features such as clusters, distributed shared memory, Tensor Memory Accelerator, and Tensor
+    Cores.
+  </p>
+  <div className="cuda-command-table-wrap">
+    <table className="cuda-command-table generation-table">
+      <thead>
+        <tr>
+          <th scope="col">Architecture / CC</th>
+          <th scope="col">Examples</th>
+          <th scope="col">Practical launch advice</th>
+        </tr>
+      </thead>
+      <tbody>
+        {generationGuidance.map((row) => (
+          <tr key={row.architecture}>
+            <th scope="row">{row.architecture}</th>
+            <td>{row.examples}</td>
+            <td>{row.advice}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Section>
+
+<Section id="workflow" title="Practical tuning workflow">
+  <ol className="launch-workflow-list">
+    <li>
+      Pick the simple baseline: <code>block = 256</code>,{" "}
+      <code>grid = (n + block - 1) / block</code>.
+    </li>
+    <li>Make consecutive threads access consecutive memory addresses when the data layout allows it.</li>
+    <li>Benchmark 128, 256, and 512 threads per block under the same correctness harness.</li>
+    <li>For register-heavy kernels, add 64. For reductions, consider 512 and 1024.</li>
+    <li>
+      Use Nsight Compute to inspect achieved occupancy, memory throughput, register count,
+      shared memory per block, warp stalls, divergence, and coalescing.
+    </li>
+    <li>
+      Use CUDA occupancy APIs as a guide, then keep the launch shape that wins the measured
+      workload on the target GPU.
+    </li>
+  </ol>
+  <p className="month-nav">
+    <Link to="/cuda-kb#pillars">Back to CUDA KB pillars</Link>
+    <Link to="/cuda-lab">Open CUDA lab</Link>
+    <Link to="/profiling-lab">Open profiling lab</Link>
+  </p>
+</Section>
+
+<Section id="interview" title="Interview checks">
+  <p>
+    When the execution model is solid, these answers should come from one kernel's launch
+    ledger and profiler evidence instead of from CUDA vocabulary alone.
+  </p>
+  <div className="answer-grid">
+    {executionInterviewAnswers.map((answer) => (
+      <article className="answer-card" key={answer.prompt}>
+        <h3>{answer.prompt}</h3>
+        <p className="short-answer">{answer.shortAnswer}</p>
+        <ul>
+          {answer.deepAnswer.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+        </ul>
+        <p className="evidence-hook">
+          <strong>Evidence to collect:</strong> {answer.evidenceToCollect}
+        </p>
+      </article>
+    ))}
+  </div>
+</Section>

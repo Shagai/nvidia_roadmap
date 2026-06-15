@@ -1,5 +1,5 @@
-export { ExecutionModelFoundations } from "./ExecutionModelFoundations";
-export { ExecutionModelScheduling } from "./ExecutionModelScheduling";
-export { ExecutionModelPractice } from "./ExecutionModelPractice";
-export { ExecutionModelPatterns } from "./ExecutionModelPatterns";
-export { ExecutionModelSources } from "./ExecutionModelSources";
+export { default as ExecutionModelFoundations } from "./ExecutionModelFoundations.mdx";
+export { default as ExecutionModelScheduling } from "./ExecutionModelScheduling.mdx";
+export { default as ExecutionModelPractice } from "./ExecutionModelPractice.mdx";
+export { default as ExecutionModelPatterns } from "./ExecutionModelPatterns.mdx";
+export { default as ExecutionModelSources } from "./ExecutionModelSources.mdx";
