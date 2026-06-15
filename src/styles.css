@@ -1943,6 +1943,138 @@ h5 {
   background: color-mix(in srgb, var(--warning), transparent 55%);
 }
 
+.roofline-panel {
+  margin: 1.25rem 0;
+}
+
+.roofline-svg {
+  background: color-mix(in srgb, var(--accent-soft), transparent 58%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.roofline-panel figcaption {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.roofline-axis {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.roofline-bandwidth {
+  stroke: var(--warning);
+  stroke-width: 4;
+}
+
+.roofline-compute {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.roofline-knee {
+  stroke: var(--muted);
+  stroke-dasharray: 6 6;
+  stroke-width: 2;
+}
+
+.roofline-axis-label,
+.roofline-line-label,
+.roofline-region-label,
+.roofline-point-label {
+  fill: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.roofline-axis-label {
+  fill: var(--muted);
+}
+
+.roofline-y-label {
+  transform: rotate(-90deg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.roofline-line-label {
+  fill: var(--muted);
+  font-size: 14px;
+}
+
+.roofline-slope-label {
+  transform: rotate(-39deg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.roofline-region-label {
+  fill: var(--accent);
+  font-size: 14px;
+}
+
+.roofline-point {
+  fill: var(--text);
+  stroke: var(--panel);
+  stroke-width: 3;
+}
+
+.roofline-point-a1 {
+  fill: var(--success);
+}
+
+.roofline-point-a2 {
+  fill: var(--warning);
+}
+
+.roofline-point-a3 {
+  fill: var(--skill-gpu);
+}
+
+.roofline-case-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.roofline-case-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.roofline-case-card > span {
+  align-items: center;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  color: var(--accent);
+  display: inline-flex;
+  font-weight: 760;
+  height: 2rem;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+  width: 2rem;
+}
+
+.roofline-case-card h3 {
+  font-size: 1.05rem;
+}
+
+.roofline-case-card p {
+  color: var(--muted);
+  margin-top: 0.45rem;
+}
+
 .latency-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 1rem 0;
@@ -2096,6 +2228,7 @@ textarea {
   .cuda-glossary-grid,
   .mental-model-practice-grid,
   .mental-model-stat-grid,
+  .roofline-case-grid,
   .skill-map-grid,
   .month-columns,
   .control-grid,
