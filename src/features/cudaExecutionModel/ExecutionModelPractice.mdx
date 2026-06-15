@@ -1,33 +1,98 @@
-import { DetailList } from "../../components/DetailList";
 import { Section } from "../../components/Section";
-import { executionPractice, executionTraps, firstChoices } from "../../data/cudaKnowledge";
+import { firstChoices } from "../../data/cudaKnowledge";
 
-<Section id="practice" title="Practice">
-<div className="mental-model-practice-grid">
-  {executionPractice.map((practice) => (
-    <article className="mental-model-practice-card" key={practice.title}>
-      <h3>{practice.title}</h3>
-      {practice.purpose}
-      <DetailList title="Steps" items={practice.steps} ordered />
-      <DetailList title="Evidence" items={practice.evidence} />
-    </article>
-  ))}
+<Section id="practice" title="Lab path">
+
+A good execution-model lab should make the launch explainable before it becomes a benchmark.
+The goal is not to memorize one block size. The goal is to build a small paper trail that
+connects the kernel, launch dimensions, correctness checks, and profiler evidence.
+
+1. Pick one simple kernel and write the global index formula beside it.
+2. Record `n`, block size, grid size, launched threads, guard threads, and warps per block.
+3. Test at least one input smaller than a block and one input that is not divisible by the block size.
+4. Run a block-size sweep with 64, 128, 256, and 512 under the same correctness harness.
+5. Capture one Nsight Compute report for the best and one nearby losing launch.
+6. Decide whether the next experiment changes block size, memory access, shared memory, or the algorithm.
+
+The useful lab artifact is a launch ledger:
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Field</th>
+        <th scope="col">Example</th>
+        <th scope="col">Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Problem size</th>
+        <td><code>n = 1003</code></td>
+        <td>Shows whether the final block needs guard threads.</td>
+      </tr>
+      <tr>
+        <th scope="row">Launch</th>
+        <td><code>grid = 4</code>, <code>block = 256</code></td>
+        <td>Connects host launch code to logical work count.</td>
+      </tr>
+      <tr>
+        <th scope="row">Coverage</th>
+        <td>1024 launched threads, 21 guard threads</td>
+        <td>Proves why the bounds guard is expected to run.</td>
+      </tr>
+      <tr>
+        <th scope="row">Profiler facts</th>
+        <td>Registers, shared memory, achieved occupancy, stall reason</td>
+        <td>Turns performance claims into evidence.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 </Section>
 
-<Section id="traps" title="Traps">
-<div className="mental-model-trap-list">
-  {executionTraps.map((trap) => (
-    <article className="mental-model-trap-card" key={trap.title}>
-      <h3>{trap.title}</h3>
+<Section id="traps" title="Common mistakes">
 
-        <strong>Symptom:</strong> {trap.symptom}
+Most execution-model bugs are not exotic. They come from mixing the logical launch model
+with the hardware execution model or from measuring performance before ownership is clear.
 
-        <strong>Why it happens:</strong> {trap.whyItHappens}
-
-      <DetailList title="Correction" items={trap.correction} />
-    </article>
-  ))}
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Mistake</th>
+        <th scope="col">Symptom</th>
+        <th scope="col">Correction</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Forgetting the bounds guard</th>
+        <td>The kernel works for divisible sizes and corrupts memory for other sizes.</td>
+        <td>Use <code>if (i &lt; n)</code> for 1D kernels and x/y guards for 2D kernels.</td>
+      </tr>
+      <tr>
+        <th scope="row">Using SM count as grid size</th>
+        <td>The launch underfills ordinary data-parallel work or has large tail effects.</td>
+        <td>Launch enough independent blocks to cover the data; use SM count deliberately for grid-stride or persistent patterns.</td>
+      </tr>
+      <tr>
+        <th scope="row">Assuming 1024 is best</th>
+        <td>A larger block looks more parallel but performs worse or leaves fewer resident blocks per SM.</td>
+        <td>Start with 128 or 256 and benchmark nearby choices under the same harness.</td>
+      </tr>
+      <tr>
+        <th scope="row">Treating occupancy as the final score</th>
+        <td>A higher-occupancy launch does not improve the benchmark.</td>
+        <td>Read occupancy beside memory throughput, register pressure, shared memory, and stall reasons.</td>
+      </tr>
+      <tr>
+        <th scope="row">Ignoring divergence</th>
+        <td>Many launched threads still spend time serializing different branch paths.</td>
+        <td>Inspect branch and loop predicates one warp at a time.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 </Section>
 
@@ -36,6 +101,11 @@ id="choices"
 title="Good first choices by kernel type"
 note="These are starting points for the first correct benchmark, not universal optima."
 >
+
+The first launch shape should be boring. Choose a clear baseline, make it correct, then move
+only one variable at a time. Some kernels are shaped by memory access, some by tile geometry,
+and some by mature libraries that already encode architecture-specific launch decisions.
+
 <div className="cuda-command-table-wrap">
   <table className="cuda-command-table launch-choice-table">
     <thead>
@@ -56,4 +126,7 @@ note="These are starting points for the first correct benchmark, not universal o
     </tbody>
   </table>
 </div>
+
+The table is a starting map, not a performance proof. The proof is a correctness test, a
+benchmark sweep, and profiler evidence tied to the actual target GPU.
 </Section>

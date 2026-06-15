@@ -1,13 +1,23 @@
 import { Section } from "../../components/Section";
 import { cudaSources, sharedExplanationSources } from "../../data/cudaKnowledge";
+
 export const sourceById = new Map(cudaSources.map((source) => [source.id, source]));
 
 <Section
 id="sources"
 title="Source anchors"
-note="Official references cover stable CUDA behavior. The shared ChatGPT notes are included because they were used as the teaching-source prompts for these page additions."
+note="Official references cover stable CUDA behavior. The shared notes are included because they were used as teaching-source prompts for these page additions."
 >
+
+The page should be read as a study guide, not as a replacement for the CUDA manuals. Use the
+guide to build the mental model, then use the official references to confirm architecture
+limits, API signatures, occupancy behavior, profiling metrics, and library guidance.
+
 <h3>Official references</h3>
+
+These are the references to keep open when turning the article into code or interview
+answers:
+
 <div className="reference-grid">
   {[
     "programming-guide",
@@ -31,7 +41,12 @@ note="Official references cover stable CUDA behavior. The shared ChatGPT notes a
     );
   })}
 </div>
+
 <h3>Shared explanation notes</h3>
+
+The scheduling and divergence sections also keep links to the shared explanation notes that
+motivated those additions.
+
 <div className="reference-grid">
   {sharedExplanationSources.map((source) => (
     <a className="reference-card" href={source.url} key={source.id}>

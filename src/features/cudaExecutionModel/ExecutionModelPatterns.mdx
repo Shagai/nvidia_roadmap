@@ -1,18 +1,23 @@
 import { Link } from "react-router-dom";
+import { Callout } from "../../components/Callout";
 import { CodeBlock } from "../../components/CodeBlock";
 import { Section } from "../../components/Section";
-import { executionInterviewAnswers, generationGuidance } from "../../data/cudaKnowledge";
+import { generationGuidance } from "../../data/cudaKnowledge";
 
-<Section id="patterns" title="Modern launch patterns">
-<div className="launch-pattern-grid">
-  <article className="launch-pattern-card">
-    <h3>Grid-stride loop</h3>
+<Section id="patterns" title="Launch patterns">
 
-      A grid-stride loop decouples total data size from the number of launched blocks. It is
-      useful when you want a controlled number of blocks while still covering very large
-      inputs.
+After the simple one-thread-per-element launch is comfortable, the next patterns should each
+answer a specific design pressure. Do not adopt a pattern because it sounds advanced. Adopt
+it because the kernel needs controlled block count, a 2D data mapping, per-block scratch
+space, or occupancy guidance.
 
-    <CodeBlock>{`__global__ void vecAddKernel(const float* A,
+<h3>Grid-stride loop</h3>
+
+A grid-stride loop decouples total data size from the number of launched blocks. Each thread
+starts at its global thread id and advances by the total number of launched threads. This is
+useful when you want a controlled number of blocks while still covering very large inputs.
+
+<CodeBlock>{`__global__ void vecAddKernel(const float* A,
                              const float* B,
                              float* C,
                              int n)
@@ -29,46 +34,42 @@ cudaGetDeviceProperties(&prop, 0);
 int block = 256;
 int grid = 4 * prop.multiProcessorCount;
 vecAddKernel<<<grid, block>>>(A_d, B_d, C_d, n);`}</CodeBlock>
-  </article>
 
-  <article className="launch-pattern-card">
-    <h3>Row-major 2D mapping</h3>
+<h3>Row-major 2D mapping</h3>
 
-      For row-major arrays, keep consecutive <code>threadIdx.x</code> values on consecutive
-      memory addresses when possible.
+For row-major arrays, keep consecutive `threadIdx.x` lanes on consecutive memory addresses
+when possible. The mapping below is boring on purpose: `x` comes from the fastest-changing
+thread index, and `idx = y * width + x` follows row-major layout.
 
-    <CodeBlock>{`int x = blockIdx.x * blockDim.x + threadIdx.x;
+<CodeBlock>{`int x = blockIdx.x * blockDim.x + threadIdx.x;
 int y = blockIdx.y * blockDim.y + threadIdx.y;
 int idx = y * width + x;
 
 if (x < width && y < height) {
     output[idx] = transform(input[idx]);
 }`}</CodeBlock>
-  </article>
 
-  <article className="launch-pattern-card">
-    <h3>Dynamic shared memory</h3>
+<h3>Dynamic shared memory</h3>
 
-      Kernels that declare <code>extern __shared__</code> receive the per-block allocation
-      through the third launch parameter. Large allocations above the default per-block limit
-      require explicit opt-in with a function attribute.
+Kernels that declare `extern __shared__` receive the per-block allocation through the third
+launch parameter. The value is bytes per block, not bytes for the whole grid. Large
+allocations above a default per-block limit can require an explicit function attribute.
 
-    <CodeBlock>{`extern __shared__ float smem[];
+<CodeBlock>{`extern __shared__ float smem[];
 
 int block = 256;
 int grid = (n + block * 2 - 1) / (block * 2);
 size_t sharedBytes = block * sizeof(float);
 
 reduceKernel<<<grid, block, sharedBytes>>>(input, partial, n);`}</CodeBlock>
-  </article>
 
-  <article className="launch-pattern-card">
-    <h3>Occupancy helper APIs</h3>
+<h3>Occupancy helper APIs</h3>
 
-      CUDA can estimate a launch configuration that reaches high occupancy. Treat that result
-      as a guide and benchmark it against nearby block sizes.
+CUDA can estimate a launch configuration that reaches high occupancy. Treat that result as a
+candidate, not as the answer. Benchmark it against nearby block sizes and keep the measured
+winner.
 
-    <CodeBlock>{`int minGridSize = 0;
+<CodeBlock>{`int minGridSize = 0;
 int blockSize = 0;
 cudaOccupancyMaxPotentialBlockSize(
     &minGridSize,
@@ -80,21 +81,23 @@ cudaOccupancyMaxPotentialBlockSize(
 
 int gridSize = (n + blockSize - 1) / blockSize;
 vecAddKernel<<<gridSize, blockSize>>>(A_d, B_d, C_d, n);`}</CodeBlock>
-  </article>
-</div>
+
+<Callout title="Pattern selection rule" tone="success">
+Use the simplest launch that makes ownership obvious. Add grid-stride loops, shared-memory
+tiles, or occupancy helpers only when they answer a concrete constraint in the kernel.
+</Callout>
 </Section>
 
 <Section
 id="generations"
-title="Generation-specific guidance"
+title="Generation lens"
 note="The basic launch rule stays stable; the resource envelope and advanced hardware features change."
 >
 
-  The ordinary workflow remains: use multiples of 32, start with 128 or 256, benchmark 512
-  where it makes sense, and avoid 1024 unless measurement supports it. What changes across
-  compute capabilities is the resident-resource envelope and availability of advanced
-  features such as clusters, distributed shared memory, Tensor Memory Accelerator, and Tensor
-  Cores.
+The ordinary workflow remains stable across CUDA generations: use multiples of 32, start
+with 128 or 256, benchmark 512 where it makes sense, and avoid 1024 unless measurement
+supports it. What changes is the resource envelope and availability of features such as
+clusters, distributed shared memory, Tensor Memory Accelerator, and Tensor Cores.
 
 <div className="cuda-command-table-wrap">
   <table className="cuda-command-table generation-table">
@@ -116,26 +119,27 @@ note="The basic launch rule stays stable; the resource envelope and advanced har
     </tbody>
   </table>
 </div>
+
+Architecture facts should narrow the search space, not replace measurement. A launch that
+wins on one GPU can lose on another if registers, shared-memory limits, memory bandwidth,
+cache behavior, or instruction mix change.
 </Section>
 
-<Section id="workflow" title="Practical tuning workflow">
-<ol className="launch-workflow-list">
-  <li>
-    Pick the simple baseline: <code>block = 256</code>,{" "}
-    <code>grid = (n + block - 1) / block</code>.
-  </li>
-  <li>Make consecutive threads access consecutive memory addresses when the data layout allows it.</li>
-  <li>Benchmark 128, 256, and 512 threads per block under the same correctness harness.</li>
-  <li>For register-heavy kernels, add 64. For reductions, consider 512 and 1024.</li>
-  <li>
-    Use Nsight Compute to inspect achieved occupancy, memory throughput, register count,
-    shared memory per block, warp stalls, divergence, and coalescing.
-  </li>
-  <li>
-    Use CUDA occupancy APIs as a guide, then keep the launch shape that wins the measured
-    workload on the target GPU.
-  </li>
-</ol>
+<Section id="workflow" title="Tuning workflow">
+
+The safest tuning sequence is deliberately plain:
+
+1. Pick the simple baseline: `block = 256`, `grid = (n + block - 1) / block`.
+2. Make consecutive threads access consecutive memory addresses when the data layout allows it.
+3. Benchmark 128, 256, and 512 threads per block under the same correctness harness.
+4. For register-heavy kernels, add 64. For reductions, consider 512 and 1024.
+5. Use Nsight Compute to inspect achieved occupancy, memory throughput, register count, shared memory per block, warp stalls, divergence, and coalescing.
+6. Keep the launch shape that wins the measured workload on the target GPU.
+
+Record the command line, input size, GPU model, CUDA version, compiler flags, and correctness
+status next to every timing. A benchmark number without the launch ledger is hard to learn
+from and hard to reproduce.
+
 <div className="month-nav">
   <Link to="/cuda-kb#pillars">Back to CUDA KB pillars</Link>
   <Link to="/cuda-lab">Open CUDA lab</Link>
@@ -143,25 +147,19 @@ note="The basic launch rule stays stable; the resource envelope and advanced har
 </div>
 </Section>
 
-<Section id="interview" title="Interview checks">
+<Section id="interview" title="Learning checklist">
 
-  When the execution model is solid, these answers should come from one kernel's launch
-  ledger and profiler evidence instead of from CUDA vocabulary alone.
+Use this page while explaining one real kernel. The goal is to answer from the launch ledger
+and profiler evidence instead of from vocabulary alone.
 
-<div className="answer-grid">
-  {executionInterviewAnswers.map((answer) => (
-    <article className="answer-card" key={answer.prompt}>
-      <h3>{answer.prompt}</h3>
-      <div className="short-answer">{answer.shortAnswer}</div>
-      <ul>
-        {answer.deepAnswer.map((point) => (
-          <li key={point}>{point}</li>
-        ))}
-      </ul>
-      <div className="evidence-hook">
-        <strong>Evidence to collect:</strong> {answer.evidenceToCollect}
-      </div>
-    </article>
-  ))}
-</div>
+1. I can explain grid, block, thread, warp, and SM without treating them as synonyms.
+2. I can derive the global index formula used by a 1D kernel and a row-major 2D kernel.
+3. I can compute grid size, launched threads, guard threads, and warps per block for a chosen `n`.
+4. I can explain why a normal grid may contain far more blocks than the GPU has SMs.
+5. I can explain why 256 threads per block is a baseline, not a law.
+6. I can describe when 1024 threads per block can reduce resident blocks or expose resource pressure.
+7. I can identify whether a branch predicate is uniform or lane-dependent inside one warp.
+8. I can explain how a grid-stride loop covers inputs larger than the launched thread count.
+9. I can read achieved occupancy beside registers, shared memory, memory throughput, and stall reasons.
+10. I can justify the final launch shape with a correctness run, a benchmark sweep, and profiler facts.
 </Section>

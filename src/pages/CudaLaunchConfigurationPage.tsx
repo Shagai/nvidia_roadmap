@@ -8,22 +8,22 @@ import {
 } from "../features/cudaExecutionModel";
 
 const toc = [
-  { id: "frame", label: "Frame" },
-  { id: "syntax", label: "Syntax" },
-  { id: "coverage", label: "Coverage" },
-  { id: "know", label: "Know" },
+  { id: "frame", label: "Mental model" },
+  { id: "syntax", label: "Launch syntax" },
+  { id: "coverage", label: "Indexing" },
+  { id: "know", label: "Vocabulary" },
   { id: "sms", label: "Blocks vs SMs" },
-  { id: "warps", label: "Why 256" },
+  { id: "warps", label: "Warp lens" },
   { id: "scheduling", label: "Scheduling" },
   { id: "divergence", label: "Divergence" },
   { id: "occupancy", label: "Occupancy" },
-  { id: "practice", label: "Practice" },
-  { id: "traps", label: "Traps" },
+  { id: "practice", label: "Lab path" },
+  { id: "traps", label: "Mistakes" },
   { id: "choices", label: "First choices" },
   { id: "patterns", label: "Patterns" },
-  { id: "generations", label: "Generations" },
+  { id: "generations", label: "Generation lens" },
   { id: "workflow", label: "Workflow" },
-  { id: "interview", label: "Interview" },
+  { id: "interview", label: "Checklist" },
   { id: "sources", label: "Sources" },
 ];
 

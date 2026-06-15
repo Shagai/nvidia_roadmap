@@ -252,6 +252,13 @@
   text-decoration: none;
 }
 
+.reference-card strong,
+.reference-card span,
+.reference-card small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .reference-card:hover {
   border-color: var(--accent);
 }

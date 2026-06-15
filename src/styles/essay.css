@@ -8,6 +8,7 @@
 .essay-article {
   grid-column: 2;
   min-width: 0;
+  overflow-x: hidden;
 }
 
 .side-toc {

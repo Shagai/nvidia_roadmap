@@ -2,23 +2,21 @@ import { Callout } from "../../components/Callout";
 import { CodeBlock } from "../../components/CodeBlock";
 import { CudaOccupancyExplorer, CudaWarpDivergenceFigure, CudaWarpSchedulingFigure } from "../../components/cudaLaunchFigures";
 import { Section } from "../../components/Section";
-import { divergenceChecks, schedulingChecks } from "../../data/cudaKnowledge";
 
 <Section
 id="scheduling"
-title="Warp scheduling and latency tolerance"
+title="Warp scheduling"
 note="The scheduler hides waits by switching to ready resident warps. It does not make a slow memory operation faster."
 >
 
-  An SM executes work by issuing instructions from ready warps. When one warp reaches a long
-  wait, such as a global-memory load, the scheduler can choose another resident warp whose
-  next instruction is ready. This is the central CUDA latency-hiding mechanism: keep enough
-  independent warps available so the SM can do useful work while some warps are waiting.
+An SM does not schedule one arbitrary CUDA thread at a time. It keeps blocks resident, tracks
+their warps, and issues instructions from warps whose next instruction is ready. When one
+warp reaches a long wait, such as a global-memory load, the scheduler can issue work from a
+different resident warp.
 
-<div className="source-note">
-  {"Source note: "}
-  <a href="https://chatgpt.com/share/6a30089d-1fd4-83eb-a09c-0cc5286ff763">ChatGPT share, Warp Scheduling and Latency</a>
-</div>
+That is the core latency-tolerance model: a slow operation is still slow, but the SM may have
+other useful warp instructions to issue while that operation is pending.
+
 <CodeBlock>{`// Hardware-level mental model, not literal scheduler order:
 cycle 0: issue Warp 0 instruction
          Warp 0 loads from global memory and stalls
@@ -29,45 +27,62 @@ cycle 3: issue Warp 3 instruction
 
 later:   Warp 0's memory data is ready
          Warp 0 becomes eligible to issue again`}</CodeBlock>
+
 <CudaWarpSchedulingFigure />
-<div className="mental-model-section-grid">
-  {schedulingChecks.map((check) => (
-    <article className="mental-model-deep-card" key={check.title}>
-      <h3>{check.title}</h3>
-      <div className="short-answer">{check.thesis}</div>
-      <ul>
-        {check.details.map((detail) => (
-          <li key={detail}>{detail}</li>
-        ))}
-      </ul>
-      <div className="evidence-hook">
-        <strong>Diagnostic:</strong> {check.diagnostic}
-      </div>
-    </article>
-  ))}
+
+The scheduling questions are practical:
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Question</th>
+        <th scope="col">Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">How many warps are resident?</th>
+        <td>The scheduler needs resident warps before it can hide a waiting warp.</td>
+      </tr>
+      <tr>
+        <th scope="row">How many resident warps are eligible?</th>
+        <td>A resident warp that is waiting on memory, a dependency, or a barrier cannot issue.</td>
+      </tr>
+      <tr>
+        <th scope="row">What is the dominant wait reason?</th>
+        <td>The next experiment depends on whether the bottleneck is memory, dependencies, synchronization, or instruction mix.</td>
+      </tr>
+      <tr>
+        <th scope="row">Did changing block size change the bottleneck?</th>
+        <td>A faster launch is the one that improves the measured workload, not the one with the cleanest theory.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+
 <Callout title="Why this changes how you read performance" tone="success">
-  A single memory load can still take hundreds of cycles. The performance question is whether
-  the SM had other eligible warps to issue during that wait. This is why occupancy, register
-  pressure, shared-memory use, and independent work all show up in the same tuning
-  conversation.
+A single global-memory load can still take hundreds of cycles. The performance question is
+whether the SM had other eligible warps to issue during that wait.
 </Callout>
+
+<div className="source-note">
+  {"Source note: "}
+  <a href="https://chatgpt.com/share/6a30089d-1fd4-83eb-a09c-0cc5286ff763">ChatGPT share, Warp Scheduling and Latency</a>
+</div>
 </Section>
 
 <Section
 id="divergence"
-title="Thread divergence"
+title="Divergence"
 note="Divergence is a warp-level question. Inspect one warp's lanes, not only the source line."
 >
 
-  A control construct can cause thread divergence when its decision condition can evaluate
-  differently for lanes in the same warp. Branches are the obvious case, but loops follow the
-  same rule: if the loop condition depends on a lane-varying value, some lanes can keep
-  iterating while others become inactive.
-<div className="source-note">
-  {"Source note: "}
-  <a href="https://chatgpt.com/share/6a300586-5dfc-83eb-b328-4120004d4fc2">ChatGPT share, Thread Divergence in CUDA</a>
-</div>
+A branch diverges when lanes in the same warp need different instruction paths. CUDA does not
+make that branch wrong, but it can make the warp run paths serially with different active
+lane masks. Loops follow the same rule: if the exit condition varies by lane, some lanes stop
+participating while the warp continues for lanes that still have work.
+
 <CodeBlock>{`// Diverges in the first warp: lanes 0, 1, and 2 disagree with lanes 3..31.
 if (threadIdx.x > 2) {
     do_taken_path();
@@ -86,29 +101,56 @@ int limit = a[threadIdx.x];
 for (int k = 0; k < limit; ++k) {
     do_work(k);
 }`}</CodeBlock>
+
 <CudaWarpDivergenceFigure />
-<div className="mental-model-section-grid">
-  {divergenceChecks.map((check) => (
-    <article className="mental-model-deep-card" key={check.title}>
-      <h3>{check.title}</h3>
-      <div className="short-answer">{check.thesis}</div>
-      <ul>
-        {check.details.map((detail) => (
-          <li key={detail}>{detail}</li>
-        ))}
-      </ul>
-      <div className="evidence-hook">
-        <strong>Diagnostic:</strong> {check.diagnostic}
-      </div>
-    </article>
-  ))}
+
+Read every branch through a one-warp lens:
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Predicate type</th>
+        <th scope="col">Divergence risk</th>
+        <th scope="col">Example</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Uniform for the whole grid</th>
+        <td>Low. Every lane sees the same value.</td>
+        <td><code>if (use_fast_path)</code></td>
+      </tr>
+      <tr>
+        <th scope="row">Uniform by warp boundary</th>
+        <td>Low inside each warp, even if different warps choose different paths.</td>
+        <td><code>if (threadIdx.x &lt; 32)</code></td>
+      </tr>
+      <tr>
+        <th scope="row">Lane-dependent</th>
+        <td>High. Neighboring lanes can disagree.</td>
+        <td><code>if (threadIdx.x &gt; 2)</code> or <code>if (i % 2 == 0)</code></td>
+      </tr>
+      <tr>
+        <th scope="row">Data-dependent</th>
+        <td>Workload-dependent. Adjacent elements decide the active mask.</td>
+        <td><code>if (a[i] &gt; threshold)</code></td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+
 <Callout title="Boundary divergence is often the right tradeoff" tone="success">
-  For vector addition with <code>n = 1003</code> and <code>block = 256</code>, the launch
-  creates 1024 logical threads. The final block has 235 useful threads and 21 guard threads,
-  so only the last warp in that block is partially active. That small amount of divergence is
-  usually better than writing special-case launch code for every input length.
+For vector addition with <code>n = 1003</code> and <code>block = 256</code>, the launch
+creates 1024 logical threads. The final block has 235 useful threads and 21 guard threads,
+so only the last warp in that block is partially active. That small amount of divergence is
+usually better than special-case launch code for every input length.
 </Callout>
+
+<div className="source-note">
+  {"Source note: "}
+  <a href="https://chatgpt.com/share/6a300586-5dfc-83eb-b328-4120004d4fc2">ChatGPT share, Thread Divergence in CUDA</a>
+</div>
 </Section>
 
 <Section
@@ -117,10 +159,11 @@ title="Occupancy and resource fit"
 note="This figure is a teaching model. For exact values, use the real kernel's registers, shared memory, target architecture, and CUDA occupancy APIs."
 >
 
-  A block must fit on one SM. Resident blocks are limited by threads, warps, registers, shared
-  memory, resident-block limits, and other architecture-specific resources. If no block fits,
-  the launch fails. If only one block fits, the GPU may have too little independent work per
-  SM to hide latency.
+Occupancy is the resident-warps view of a launch. A block must fit on one SM before it can
+run. Resident blocks are limited by threads, warps, registers, shared memory, resident-block
+slots, and architecture-specific limits. If no block fits, the launch fails. If only one
+block fits, the SM may have too few independent warps to hide latency.
+
 <CodeBlock>{`activeBlocksPerSM = min(
     maxBlocksPerSM,
     maxThreadsPerSM / threadsPerBlock,
@@ -132,10 +175,49 @@ note="This figure is a teaching model. For exact values, use the real kernel's r
 
 activeWarpsPerSM = activeBlocksPerSM * warpsPerBlock;
 occupancy        = activeWarpsPerSM / maxWarpsPerSM;`}</CodeBlock>
+
 <CudaOccupancyExplorer />
+
+The useful part of occupancy is not the percentage by itself. It is the dependency graph
+behind that percentage.
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Limit</th>
+        <th scope="col">What to record</th>
+        <th scope="col">What it can imply</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Threads and warps</th>
+        <td>Threads per block and warps per block.</td>
+        <td>Very large blocks can reduce block-level scheduling choices.</td>
+      </tr>
+      <tr>
+        <th scope="row">Registers</th>
+        <td>Registers per thread from compiler output or profiler metrics.</td>
+        <td>Register-heavy kernels may need smaller blocks to keep more blocks resident.</td>
+      </tr>
+      <tr>
+        <th scope="row">Shared memory</th>
+        <td>Static and dynamic shared memory per block.</td>
+        <td>A bigger tile can be faster even when occupancy drops.</td>
+      </tr>
+      <tr>
+        <th scope="row">Stall reasons</th>
+        <td>Nsight Compute warp-state and stall metrics.</td>
+        <td>High occupancy is not enough if memory access, dependencies, or divergence dominate.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <Callout title="Why 1024 is not automatically better" tone="warning">
-  A 1024-thread block contains 32 warps. On an SM profile with a 1536 resident-thread limit,
-  the thread limit alone allows only one such block per SM. With 256-thread blocks, the same
-  thread limit can allow six blocks and 48 resident warps before other resources are counted.
+A 1024-thread block contains 32 warps. On an SM profile with a 1536 resident-thread limit,
+the thread limit alone allows only one such block per SM. With 256-thread blocks, the same
+thread limit can allow six blocks and 48 resident warps before other resources are counted.
 </Callout>
 </Section>

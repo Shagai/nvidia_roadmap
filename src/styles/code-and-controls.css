@@ -26,20 +26,24 @@
   background: var(--code-bg);
   border: 1px solid var(--code-border);
   border-radius: 8px;
+  box-sizing: border-box;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 28px rgba(0, 0, 0, 0.2);
   color: var(--code-text);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.92rem;
   line-height: 1.55;
   margin: 0;
+  max-width: 100%;
   overflow-x: auto;
   padding: 3rem 1rem 1rem;
   tab-size: 2;
+  width: 100%;
 }
 
 .code-block code {
   background: var(--code-bg);
   display: block;
+  min-width: max-content;
 }
 
 .code-line {
