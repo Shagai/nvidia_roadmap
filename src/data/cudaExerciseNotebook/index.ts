@@ -5,6 +5,7 @@ export * from "./runtimeApi";
 export * from "./matrix";
 export * from "./geometry";
 export * from "./memory";
+export * from "./sharedMemoryTiling";
 export * from "./warps";
 export * from "./occupancy";
 export * from "./sections";

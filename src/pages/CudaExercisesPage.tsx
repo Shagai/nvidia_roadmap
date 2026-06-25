@@ -18,6 +18,7 @@ export function CudaExercisesPage() {
         { id: "matrix", label: "Matrix kernels" },
         { id: "geometry", label: "Geometry" },
         { id: "memory", label: "Memory model" },
+        { id: "shared-memory-tiling", label: "Shared memory" },
         { id: "warps", label: "Warps" },
         { id: "occupancy", label: "Occupancy" },
       ]}
