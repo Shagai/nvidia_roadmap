@@ -35,6 +35,7 @@ export type CudaGlossaryItem = {
   term: string;
   meaning: string;
   whenItMatters: string;
+  explanationPath: string;
 };
 
 export type CudaStudyTrack = {

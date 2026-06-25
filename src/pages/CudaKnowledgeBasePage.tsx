@@ -53,6 +53,25 @@ export function CudaKnowledgeBasePage() {
             </article>
           ))}
         </div>
+        <article className="cuda-kb-feature-link">
+          <div>
+            <p>Kernel deep page</p>
+            <h3>Tiling multiplication, kernel ownership, and synchronization</h3>
+            <span>
+              Start from tiled matrix multiplication to see how blocks, threads, shared memory,
+              private registers, and barriers fit together in one concrete kernel. Then open the
+              focused __syncthreads() article for barrier rules and mistakes.
+            </span>
+          </div>
+          <div className="cuda-kb-feature-actions">
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/kernels">
+              Kernel guide
+            </Link>
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/syncthreads">
+              __syncthreads()
+            </Link>
+          </div>
+        </article>
         <Callout title="Working rule" tone="success">
           Every CUDA note should eventually connect to a runnable command, a measured result, a
           profiler observation, or an interview answer backed by project evidence.
@@ -151,6 +170,14 @@ ncu --set full --target-processes all ./build/cuda_lab`}</CodeBlock>
               <h3>{item.term}</h3>
               <p>{item.meaning}</p>
               <span>{item.whenItMatters}</span>
+              <Link
+                aria-label={`Open explanation for ${item.term}`}
+                className="cuda-glossary-link"
+                reloadDocument
+                to={item.explanationPath}
+              >
+                Open explanation
+              </Link>
             </article>
           ))}
         </div>

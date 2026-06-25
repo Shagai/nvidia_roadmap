@@ -14,7 +14,10 @@
 .cuda-kb-track-card,
 .cuda-kb-pillar,
 .cuda-kb-workflow,
-.cuda-glossary-card {
+.cuda-glossary-card,
+.cuda-kb-feature-link,
+.kernel-tile-flow article,
+.kernel-sync-grid article {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -26,16 +29,138 @@
 .cuda-kb-track-card h3,
 .cuda-kb-pillar h3,
 .cuda-kb-workflow h3,
-.cuda-glossary-card h3 {
+.cuda-glossary-card h3,
+.cuda-kb-feature-link h3,
+.kernel-tile-flow h3,
+.kernel-sync-grid h3 {
   font-size: 1.08rem;
 }
 
 .cuda-kb-track-card p,
 .cuda-kb-workflow > p,
-.cuda-glossary-card p {
+.cuda-glossary-card p,
+.kernel-tile-flow p,
+.kernel-sync-grid p {
   color: var(--muted);
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   margin-top: 0;
+}
+
+.cuda-kb-feature-link {
+  align-items: center;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 1rem;
+}
+
+.cuda-kb-feature-link p {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.cuda-kb-feature-link span {
+  color: var(--muted);
+  display: block;
+}
+
+.cuda-kb-feature-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
+.kernel-tile-flow,
+.kernel-sync-grid,
+.sync-step-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.kernel-tile-flow {
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.kernel-tile-flow > span {
+  align-self: center;
+  color: var(--accent);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.kernel-tile-flow article,
+.kernel-sync-grid article {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kernel-tile-flow article p,
+.kernel-sync-grid article p {
+  margin-bottom: 0;
+}
+
+.kernel-sync-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sync-step-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sync-step-grid article {
+  background: color-mix(in srgb, var(--accent-soft), transparent 48%);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.sync-step-grid h3 {
+  font-size: 1.05rem;
+}
+
+.sync-step-grid p {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+}
+
+.kernel-mini-matrix {
+  aspect-ratio: 1;
+  display: grid;
+  gap: 0.25rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 11rem);
+}
+
+.kernel-mini-matrix span {
+  background: color-mix(in srgb, var(--border), transparent 40%);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  min-width: 0;
+}
+
+.kernel-mini-matrix-row span.is-highlighted {
+  background: color-mix(in srgb, var(--skill-gpu), transparent 20%);
+  border-color: color-mix(in srgb, var(--skill-gpu), var(--border) 25%);
+}
+
+.kernel-mini-matrix-column span.is-highlighted {
+  background: color-mix(in srgb, var(--skill-performance), transparent 18%);
+  border-color: color-mix(in srgb, var(--skill-performance), var(--border) 25%);
+}
+
+.kernel-mini-matrix-result span.is-highlighted {
+  background: color-mix(in srgb, var(--success), transparent 10%);
+  border-color: color-mix(in srgb, var(--success), var(--border) 20%);
 }
 
 .cuda-kb-track-card ol,
@@ -173,4 +298,25 @@
   font-weight: 700;
   margin-top: 0.75rem;
   padding-top: 0.65rem;
+}
+
+.cuda-glossary-link {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  display: inline-flex;
+  font-size: 0.86rem;
+  font-weight: 720;
+  justify-content: center;
+  margin-top: 0.85rem;
+  min-height: 2.1rem;
+  padding: 0.25rem 0.7rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.cuda-glossary-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }

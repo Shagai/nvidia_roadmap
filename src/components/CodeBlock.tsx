@@ -3,6 +3,8 @@ import type { ReactElement, ReactNode } from "react";
 
 const keywords = new Set([
   "__global__",
+  "__shared__",
+  "__syncthreads",
   "auto",
   "bool",
   "break",

@@ -61,7 +61,11 @@
   .prompt-grid,
   .cuda-kb-track-grid,
   .cuda-kb-workflow-grid,
+  .cuda-kb-feature-link,
   .cuda-glossary-grid,
+  .kernel-tile-flow,
+  .kernel-sync-grid,
+  .sync-step-grid,
   .memory-scope-grid,
   .mental-model-practice-grid,
   .mental-model-stat-grid,
@@ -120,6 +124,14 @@
 
   .loop-divergence-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .kernel-tile-flow > span {
+    display: none;
+  }
+
+  .cuda-kb-feature-actions {
+    justify-content: flex-start;
   }
 }
 
