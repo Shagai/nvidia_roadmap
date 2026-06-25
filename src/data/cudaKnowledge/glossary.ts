@@ -59,7 +59,7 @@ export const cudaGlossary: CudaGlossaryItem[] = [
     term: "Occupancy",
     meaning: "A measure of active warps relative to the hardware's possible active warps.",
     whenItMatters: "Useful for latency hiding, but not a standalone performance target.",
-    explanationPath: "/cuda-kb/execution-model#occupancy",
+    explanationPath: "/cuda-kb/shared-memory-occupancy",
   },
   {
     term: "Grid-Stride Loop",
@@ -83,7 +83,7 @@ export const cudaGlossary: CudaGlossaryItem[] = [
     term: "Shared Memory",
     meaning: "Fast block-local memory explicitly managed by the kernel.",
     whenItMatters: "Helps when threads in a block reuse a tile of global data.",
-    explanationPath: "/cuda-kb/syncthreads#shared-memory",
+    explanationPath: "/cuda-kb/shared-memory-occupancy",
   },
   {
     term: "__syncthreads()",

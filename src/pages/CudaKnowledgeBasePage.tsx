@@ -33,7 +33,7 @@ export function CudaKnowledgeBasePage() {
       <Section
         id="map"
         title="Knowledge map"
-        note="Official references were checked on 2026-05-10. Recheck source pages before making version-specific claims."
+        note="Source cards include per-reference checked dates. Recheck source pages before making version-specific claims."
       >
         <p>
           The CUDA study surface is split into fundamentals, performance, systems, and interview
@@ -69,6 +69,25 @@ export function CudaKnowledgeBasePage() {
             </Link>
             <Link className="cuda-kb-deep-link" to="/cuda-kb/syncthreads">
               __syncthreads()
+            </Link>
+          </div>
+        </article>
+        <article className="cuda-kb-feature-link">
+          <div>
+            <p>Occupancy deep page</p>
+            <h3>Shared memory, resident blocks, and occupancy pressure</h3>
+            <span>
+              Use the A100-style shared-memory arithmetic to see why tiled matrix multiplication
+              can use shared memory cheaply, while a 32 KiB-per-block kernel can reduce resident
+              blocks and drop occupancy.
+            </span>
+          </div>
+          <div className="cuda-kb-feature-actions">
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/shared-memory-occupancy">
+              Occupancy guide
+            </Link>
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/execution-model#occupancy">
+              Execution model
             </Link>
           </div>
         </article>

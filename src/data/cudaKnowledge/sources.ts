@@ -23,6 +23,13 @@ export const cudaSources: CudaKnowledgeSource[] = [
     checked: "2026-05-11",
   },
   {
+    id: "ampere-tuning-guide",
+    label: "NVIDIA Ampere GPU Architecture Tuning Guide",
+    url: "https://docs.nvidia.com/cuda/ampere-tuning-guide/index.html",
+    scope: "Ampere architecture tuning notes, including A100 shared-memory carveout sizes and occupancy-related resource behavior.",
+    checked: "2026-06-25",
+  },
+  {
     id: "cuda-gpus",
     label: "CUDA GPU Compute Capability",
     url: "https://developer.nvidia.com/cuda-gpus",
