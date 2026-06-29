@@ -15,6 +15,7 @@ const toc = [
   { id: "sms", label: "Blocks vs SMs" },
   { id: "warps", label: "Warp lens" },
   { id: "scheduling", label: "Scheduling" },
+  { id: "memory-latency", label: "Memory latency" },
   { id: "divergence", label: "Divergence" },
   { id: "occupancy", label: "Occupancy" },
   { id: "practice", label: "Lab path" },

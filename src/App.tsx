@@ -73,15 +73,17 @@ function ScrollToRouteTarget() {
       const target = document.getElementById(targetId);
       if (!target) return false;
 
-      target.scrollIntoView();
+      const topbarOffset = 96;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY - topbarOffset;
+      window.scrollTo(0, Math.max(0, targetTop));
       return true;
     }
 
     function tryScroll() {
-      scrollToTarget();
+      const didScroll = scrollToTarget();
 
       attempts += 1;
-      if (attempts < 12) {
+      if (attempts < 40 && (!didScroll || attempts < 6)) {
         timeoutId = window.setTimeout(tryScroll, 50);
       }
     }

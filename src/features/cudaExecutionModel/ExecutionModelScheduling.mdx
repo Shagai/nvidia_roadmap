@@ -1,6 +1,12 @@
 import { Callout } from "../../components/Callout";
 import { CodeBlock } from "../../components/CodeBlock";
-import { CudaOccupancyExplorer, CudaWarpDivergenceFigure, CudaWarpSchedulingFigure } from "../../components/cudaLaunchFigures";
+import {
+  CudaMemoryChannelBankFigure,
+  CudaMemoryLatencyFigure,
+  CudaOccupancyExplorer,
+  CudaWarpDivergenceFigure,
+  CudaWarpSchedulingFigure,
+} from "../../components/cudaLaunchFigures";
 import { Section } from "../../components/Section";
 
 <Section
@@ -69,6 +75,133 @@ whether the SM had other eligible warps to issue during that wait.
 <div className="source-note">
   {"Source note: "}
   <a href="https://chatgpt.com/share/6a30089d-1fd4-83eb-a09c-0cc5286ff763">ChatGPT share, Warp Scheduling and Latency</a>
+</div>
+</Section>
+
+<Section
+id="memory-latency"
+title="Hiding global-memory latency"
+note="Latency hiding means overlapping waits with other useful work. It does not make a single global-memory access cheap."
+>
+
+Global memory can be slow for one warp and still deliver high throughput for the whole GPU.
+The difference is overlap. CUDA hides global-memory latency at the SM level by switching to
+other ready resident warps, and the memory system hides DRAM latency by spreading requests
+across channels and banks so one request can be preparing while another transfers.
+
+The practical lesson is that latency hiding needs both enough independent warp work and a
+memory access pattern that lets the memory system combine and distribute traffic.
+
+<CudaMemoryLatencyFigure />
+
+<h3>Two places where overlap happens</h3>
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Layer</th>
+        <th scope="col">What waits</th>
+        <th scope="col">What hides the wait</th>
+        <th scope="col">What breaks it</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">SM warp scheduler</th>
+        <td>A warp issues a global load and cannot issue its dependent instruction yet.</td>
+        <td>Other resident warps are eligible, so the scheduler issues their instructions.</td>
+        <td>Too few resident warps, too many dependent loads, barriers, divergence, or long dependency chains.</td>
+      </tr>
+      <tr>
+        <th scope="row">DRAM channels</th>
+        <td>One channel is busy with a burst transfer.</td>
+        <td>Other channels have separate buses and can transfer different memory transactions.</td>
+        <td>Traffic concentrates on too few channels or arrives as small scattered transactions.</td>
+      </tr>
+      <tr>
+        <th scope="row">DRAM banks</th>
+        <td>One bank is doing the long internal activate/read work.</td>
+        <td>Other banks prepare in parallel, then take turns using the channel bus for bursts.</td>
+        <td>Many requests target the same bank at the same time, creating bank conflicts.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+Channels and banks answer different questions. A channel is an independent path between the
+memory system and the GPU. A bank is an independent DRAM storage unit behind a channel.
+More channels raise possible bandwidth. More banks help keep each channel busy by staggering
+the long internal waits.
+
+<CudaMemoryChannelBankFigure />
+
+<h3>Why coalescing belongs in the same explanation</h3>
+
+Modern GPUs map consecutive memory regions across transactions, channels, and banks in ways
+designed to make regular access patterns productive. When adjacent lanes read adjacent
+addresses, the hardware can form fewer, wider memory transactions. Those transactions are
+much easier to distribute across the memory system than scattered single-lane requests.
+
+<CodeBlock>{`// Good: neighboring lanes read neighboring addresses.
+int i = blockIdx.x * blockDim.x + threadIdx.x;
+float x = A[i];
+
+// Bad: neighboring lanes jump around memory.
+int j = index_table[blockIdx.x * blockDim.x + threadIdx.x];
+float x = A[j];`}</CodeBlock>
+
+<div className="cuda-command-table-wrap">
+  <table className="cuda-command-table">
+    <thead>
+      <tr>
+        <th scope="col">Pattern</th>
+        <th scope="col">What the GPU can do</th>
+        <th scope="col">Performance meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Many active warps</th>
+        <td>Issue another ready warp while one warp waits on memory.</td>
+        <td>This is why occupancy and eligible-warps metrics matter.</td>
+      </tr>
+      <tr>
+        <th scope="row">Coalesced lane access</th>
+        <td>Combine adjacent lane requests into efficient memory transactions.</td>
+        <td>This uses bandwidth better than many scattered requests.</td>
+      </tr>
+      <tr>
+        <th scope="row">Distributed channel/bank traffic</th>
+        <td>Overlap DRAM preparation and burst transfers across the memory system.</td>
+        <td>This keeps the memory bus busier while individual accesses remain high-latency.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+For tiled matrix multiplication, this is why the simple access pattern matters before any
+advanced tuning. Many blocks load tiles at the same time. If the loads are regular and
+coalesced, the memory system can group them into useful transactions and distribute those
+transactions across available channels and banks. Shared memory then helps by reusing the
+loaded tile so the kernel asks global memory for fewer total bytes.
+
+<Callout title="Best and worst cases" tone="success">
+Best case: many active warps, coalesced accesses, and well-distributed channel/bank traffic.
+Worst case: few eligible warps, scattered accesses, and requests concentrated on the same
+memory resources. The first case hides much of the wait. The second case leaves SMs stalled
+and memory bandwidth underused.
+</Callout>
+
+<Callout title="Profiler reading rule" tone="warning">
+Do not read high occupancy as proof that memory latency is solved. Read achieved occupancy
+beside eligible-warps, memory throughput, coalescing or transaction metrics, cache behavior,
+and the dominant warp stall reason.
+</Callout>
+
+<div className="source-note">
+  {"Source note: "}
+  <a href="https://chatgpt.com/share/6a427519-43a4-83eb-959f-35eadb37fba5">ChatGPT share, Hiding Memory Latency</a>
 </div>
 </Section>
 

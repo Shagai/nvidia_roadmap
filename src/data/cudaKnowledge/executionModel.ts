@@ -13,6 +13,13 @@ export const sharedExplanationSources = [
     scope: "User-shared explanation used for the warp-scheduling and latency-tolerance notes.",
     checked: "2026-06-15",
   },
+  {
+    id: "chatgpt-hiding-memory-latency",
+    label: "ChatGPT share: Hiding Memory Latency",
+    url: "https://chatgpt.com/share/6a427519-43a4-83eb-959f-35eadb37fba5",
+    scope: "User-shared explanation used for the global-memory latency, coalescing, channel, and bank notes.",
+    checked: "2026-06-29",
+  },
 ];
 
 export const firstChoices = [

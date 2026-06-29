@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 type TocItem = {
   id: string;
@@ -41,7 +42,7 @@ function TocList({ toc }: { toc: TocItem[] }) {
     <ol>
       {toc.map((item) => (
         <li key={item.id}>
-          <a href={`#${item.id}`}>{item.label}</a>
+          <Link to={{ hash: `#${item.id}` }}>{item.label}</Link>
         </li>
       ))}
     </ol>
