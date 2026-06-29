@@ -42,6 +42,10 @@ export function CudaLabPage() {
           For the worked exercise set, open the{" "}
           <Link to="/cuda-lab/exercises">solved CUDA exercises</Link> notebook.
         </p>
+        <p>
+          For worked CUDA kernel examples, start with the{" "}
+          <Link to="/cuda-lab/kernel-examples">1D convolution walkthrough</Link>.
+        </p>
       </Section>
 
       <Section

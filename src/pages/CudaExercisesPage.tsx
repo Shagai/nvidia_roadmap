@@ -19,14 +19,15 @@ export function CudaExercisesPage() {
         { id: "geometry", label: "Geometry" },
         { id: "memory", label: "Memory model" },
         { id: "shared-memory-tiling", label: "Shared memory" },
+        { id: "coalescing-coarsening", label: "Coalescing" },
         { id: "warps", label: "Warps" },
         { id: "occupancy", label: "Occupancy" },
       ]}
     >
       <Section id="overview" title="Format">
         <Callout title="Source">
-          These notes are condensed from the shared CUDA exercise chat. The original transcript is
-          available at{" "}
+          These notes are condensed from the shared CUDA exercise chat and user-provided exercise
+          screenshots. The original transcript is available at{" "}
           <a href={shareUrl} target="_blank" rel="noreferrer">
             this ChatGPT share
           </a>

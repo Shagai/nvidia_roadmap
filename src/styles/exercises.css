@@ -52,6 +52,10 @@
   margin-bottom: 0;
 }
 
+.exercise-question-code {
+  margin-top: 0.85rem;
+}
+
 .exercise-question {
   border-left: 3px solid var(--warning);
   color: var(--muted);

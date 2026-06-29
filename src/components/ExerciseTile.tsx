@@ -9,6 +9,11 @@ export function ExerciseTile({ exercise }: { exercise: Exercise }) {
         <h3>{exercise.title}</h3>
       </header>
       <p className="exercise-question">{exercise.question}</p>
+      {exercise.questionCode ? (
+        <div className="exercise-question-code">
+          <CodeBlock>{exercise.questionCode}</CodeBlock>
+        </div>
+      ) : null}
       <div className="exercise-solution">
         <p className="exercise-label">Solution</p>
         <p className="exercise-answer">{exercise.answer}</p>

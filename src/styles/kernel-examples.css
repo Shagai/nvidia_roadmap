@@ -1,0 +1,207 @@
+.kernel-example-fact-grid,
+.kernel-example-index-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.kernel-example-fact-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.kernel-example-index-grid {
+  grid-template-columns: 1fr;
+}
+
+.kernel-example-fact-grid article,
+.kernel-example-index-grid article,
+.conv-figure {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  padding: 1rem;
+}
+
+.kernel-example-fact-grid span {
+  color: var(--accent);
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.kernel-example-fact-grid strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.kernel-example-fact-grid p,
+.kernel-example-index-grid p,
+.conv-figure figcaption {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+}
+
+.kernel-example-index-grid h3 {
+  font-size: 1.05rem;
+}
+
+.conv-figure {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+  overflow-x: auto;
+}
+
+.conv-row,
+.conv-output-row {
+  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+}
+
+.conv-label {
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.conv-cells {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(5, minmax(2.45rem, 1fr));
+  max-width: 22rem;
+}
+
+.conv-kernel-cells {
+  grid-template-columns: repeat(3, minmax(2.45rem, 1fr));
+  max-width: 13rem;
+}
+
+.conv-cells span,
+.conv-output-cell {
+  align-items: center;
+  background: color-mix(in srgb, var(--border), transparent 50%);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: inline-flex;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  justify-content: center;
+  min-height: 2.25rem;
+  min-width: 0;
+}
+
+.conv-cells span.is-window,
+.conv-kernel-cells span {
+  background: color-mix(in srgb, var(--accent-soft), transparent 34%);
+  border-color: color-mix(in srgb, var(--accent), var(--border) 35%);
+}
+
+.conv-cells span.is-window {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent), transparent 35%);
+}
+
+.conv-equation {
+  color: var(--text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+  font-size: 0.92rem !important;
+  margin: 0 0 0 5.25rem;
+}
+
+.conv-output-cell {
+  background: color-mix(in srgb, var(--success), transparent 78%);
+  border-color: color-mix(in srgb, var(--success), var(--border) 20%);
+  color: var(--text);
+  max-width: 4.5rem;
+}
+
+.conv-muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-left: 0.5rem;
+}
+
+.kernel-example-table-wrap {
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.kernel-example-table {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-collapse: collapse;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  min-width: 720px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.kernel-example-table th,
+.kernel-example-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.8rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.kernel-example-table thead th {
+  background: color-mix(in srgb, var(--accent-soft), transparent 42%);
+  color: var(--text);
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.kernel-example-table td {
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.94rem;
+}
+
+.kernel-example-table code {
+  color: var(--text);
+  white-space: normal;
+}
+
+@media (max-width: 860px) {
+  .kernel-example-fact-grid,
+  .kernel-example-index-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .conv-row,
+  .conv-output-row {
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .conv-cells,
+  .conv-kernel-cells {
+    max-width: none;
+    width: 100%;
+  }
+
+  .conv-cells {
+    grid-template-columns: repeat(5, minmax(2rem, 1fr));
+  }
+
+  .conv-kernel-cells {
+    grid-template-columns: repeat(3, minmax(2rem, 1fr));
+  }
+
+  .conv-equation {
+    margin-left: 0;
+  }
+}

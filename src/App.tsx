@@ -2,6 +2,7 @@ import { useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SharedLayout } from "./components/SharedLayout";
 import { CudaExercisesPage } from "./pages/CudaExercisesPage";
+import { CudaKernelExamplesPage } from "./pages/CudaKernelExamplesPage";
 import { CudaKernelsPage } from "./pages/CudaKernelsPage";
 import { CudaKnowledgeBasePage } from "./pages/CudaKnowledgeBasePage";
 import { CudaLabPage } from "./pages/CudaLabPage";
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="roadmap" element={<RoadmapPage />} />
           <Route path="cuda-lab" element={<CudaLabPage />} />
           <Route path="cuda-lab/exercises" element={<CudaExercisesPage />} />
+          <Route path="cuda-lab/kernel-examples" element={<CudaKernelExamplesPage />} />
           <Route path="profiling-lab" element={<ProfilingLabPage />} />
           <Route path="portfolio" element={<PortfolioPage />} />
           <Route path="diary" element={<DiaryPage />} />

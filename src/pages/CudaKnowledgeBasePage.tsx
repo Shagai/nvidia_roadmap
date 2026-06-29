@@ -76,6 +76,25 @@ export function CudaKnowledgeBasePage() {
         </article>
         <article className="cuda-kb-feature-link">
           <div>
+            <p>Kernel example notebook</p>
+            <h3>Solving CUDA kernels from problem statements</h3>
+            <span>
+              Start with valid 1D convolution: identify the output length, map one thread to one
+              output window, write the correctness-first kernel, then compare it with a shared-memory
+              version for the large constraint case.
+            </span>
+          </div>
+          <div className="cuda-kb-feature-actions">
+            <Link className="cuda-kb-deep-link" to="/cuda-lab/kernel-examples">
+              Worked examples
+            </Link>
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/execution-model">
+              Execution model
+            </Link>
+          </div>
+        </article>
+        <article className="cuda-kb-feature-link">
+          <div>
             <p>Occupancy deep page</p>
             <h3>Shared memory, resident blocks, and occupancy pressure</h3>
             <span>

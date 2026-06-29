@@ -1,5 +1,6 @@
 export * from "./types";
 export * from "./share";
+export * from "./coalescingAndCoarsening";
 export * from "./indexing";
 export * from "./runtimeApi";
 export * from "./matrix";

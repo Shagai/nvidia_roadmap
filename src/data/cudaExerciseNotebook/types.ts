@@ -4,6 +4,7 @@ export type Exercise = {
   explanation?: string[];
   facts?: Array<{ label: string; value: string }>;
   question: string;
+  questionCode?: string;
   title: string;
 };
 
