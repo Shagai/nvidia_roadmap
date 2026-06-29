@@ -68,6 +68,12 @@ export const cudaGlossary: CudaGlossaryItem[] = [
     explanationPath: "/cuda-kb/execution-model#patterns",
   },
   {
+    term: "Thread Coarsening",
+    meaning: "An optimization pattern where each CUDA thread handles multiple logical work items instead of exactly one.",
+    whenItMatters: "Useful when extra per-thread work improves reuse, instruction-level parallelism, or overhead, but it must be measured against occupancy, register pressure, and coalescing.",
+    explanationPath: "/cuda-kb/thread-coarsening",
+  },
+  {
     term: "Dynamic Shared Memory",
     meaning: "Per-block shared memory requested through the third kernel launch parameter and addressed through extern __shared__ declarations.",
     whenItMatters: "Important for reductions, tiles, and kernels whose shared-memory size depends on the launch shape.",

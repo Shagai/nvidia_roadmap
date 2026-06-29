@@ -10,6 +10,7 @@ import { CudaMentalModelPage } from "./pages/CudaMentalModelPage";
 import { CudaMentalModelTrapPage } from "./pages/CudaMentalModelTrapPage";
 import { CudaSharedMemoryOccupancyPage } from "./pages/CudaSharedMemoryOccupancyPage";
 import { CudaSyncthreadsPage } from "./pages/CudaSyncthreadsPage";
+import { CudaThreadCoarseningPage } from "./pages/CudaThreadCoarseningPage";
 import { DiaryPage } from "./pages/DiaryPage";
 import { ExportPage } from "./pages/ExportPage";
 import { HomePage } from "./pages/HomePage";
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="cuda-kb/kernels" element={<CudaKernelsPage />} />
           <Route path="cuda-kb/syncthreads" element={<CudaSyncthreadsPage />} />
           <Route path="cuda-kb/shared-memory-occupancy" element={<CudaSharedMemoryOccupancyPage />} />
+          <Route path="cuda-kb/thread-coarsening" element={<CudaThreadCoarseningPage />} />
           <Route path="cuda-kb/execution-model" element={<CudaLaunchConfigurationPage />} />
           <Route path="cuda-kb/launch-configuration" element={<CudaLaunchConfigurationPage />} />
           <Route path="skill-map" element={<SkillMapPage />} />

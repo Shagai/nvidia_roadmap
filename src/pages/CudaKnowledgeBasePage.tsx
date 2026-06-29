@@ -91,6 +91,25 @@ export function CudaKnowledgeBasePage() {
             </Link>
           </div>
         </article>
+        <article className="cuda-kb-feature-link">
+          <div>
+            <p>Optimization deep page</p>
+            <h3>Thread coarsening, local work, and measured granularity</h3>
+            <span>
+              Use the coarsening pattern to see when giving each thread multiple logical outputs
+              can improve reuse and instruction-level parallelism, and when it instead damages
+              occupancy, coalescing, or load balance.
+            </span>
+          </div>
+          <div className="cuda-kb-feature-actions">
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/thread-coarsening">
+              Coarsening guide
+            </Link>
+            <Link className="cuda-kb-deep-link" to="/cuda-kb#workflows">
+              Tuning workflow
+            </Link>
+          </div>
+        </article>
         <Callout title="Working rule" tone="success">
           Every CUDA note should eventually connect to a runnable command, a measured result, a
           profiler observation, or an interview answer backed by project evidence.
