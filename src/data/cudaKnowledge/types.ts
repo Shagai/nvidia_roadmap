@@ -31,6 +31,14 @@ export type CudaCommand = {
   proof: string;
 };
 
+export type CudaOptimizationChecklistItem = {
+  optimization: string;
+  computeBenefit: string;
+  memoryBenefit: string;
+  strategies: string[];
+  explanationPath: string;
+};
+
 export type CudaGlossaryItem = {
   term: string;
   meaning: string;

@@ -248,33 +248,66 @@
   background: var(--accent);
 }
 
-.cuda-command-table-wrap {
+.cuda-command-table-wrap,
+.cuda-optimization-table-wrap {
   max-width: 100%;
   overflow-x: auto;
 }
 
-.cuda-command-table {
+.cuda-command-table,
+.cuda-optimization-table {
   border-collapse: collapse;
   min-width: 760px;
   width: 100%;
 }
 
 .cuda-command-table th,
-.cuda-command-table td {
+.cuda-command-table td,
+.cuda-optimization-table th,
+.cuda-optimization-table td {
   border-bottom: 1px solid var(--border);
   padding: 0.75rem;
   text-align: left;
   vertical-align: top;
 }
 
-.cuda-command-table thead th {
+.cuda-command-table thead th,
+.cuda-optimization-table thead th {
   color: var(--text);
   font-size: 0.84rem;
   text-transform: uppercase;
 }
 
-.cuda-command-table tbody th {
+.cuda-command-table tbody th,
+.cuda-optimization-table tbody th {
   width: 16rem;
+}
+
+.cuda-optimization-table tbody th {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.cuda-optimization-table td {
+  color: var(--muted);
+}
+
+.cuda-optimization-link {
+  color: var(--text);
+  text-decoration-color: color-mix(in srgb, var(--accent), transparent 35%);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+}
+
+.cuda-optimization-link:hover {
+  color: var(--accent);
+}
+
+.cuda-optimization-table ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.15rem;
 }
 
 .cuda-command-table code {

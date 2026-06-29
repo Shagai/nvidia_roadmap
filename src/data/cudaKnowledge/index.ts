@@ -3,6 +3,7 @@ export * from "./sources";
 export * from "./pillars";
 export * from "./workflows";
 export * from "./commands";
+export * from "./optimizationChecklist";
 export * from "./glossary";
 export * from "./studyTracks";
 export * from "./mentalModelGuide";

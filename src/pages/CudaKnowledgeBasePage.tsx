@@ -7,6 +7,7 @@ import {
   cudaCommands,
   cudaGlossary,
   cudaKnowledgePillars,
+  cudaOptimizationChecklist,
   cudaSources,
   cudaStudyTracks,
   cudaWorkflows,
@@ -23,6 +24,7 @@ export function CudaKnowledgeBasePage() {
       toc={[
         { id: "map", label: "Map" },
         { id: "pillars", label: "Pillars" },
+        { id: "optimization-checklist", label: "Optimization checklist" },
         { id: "workflows", label: "Workflows" },
         { id: "commands", label: "Commands" },
         { id: "glossary", label: "Glossary" },
@@ -141,6 +143,49 @@ export function CudaKnowledgeBasePage() {
             </article>
           ))}
         </div>
+      </Section>
+
+      <Section
+        id="optimization-checklist"
+        title="Optimization checklist"
+        note="Use this as a first-pass map from observed bottleneck to plausible CUDA tuning levers."
+      >
+        <div className="cuda-optimization-table-wrap">
+          <table className="cuda-optimization-table">
+            <thead>
+              <tr>
+                <th scope="col">Optimization</th>
+                <th scope="col">Benefit to compute cores</th>
+                <th scope="col">Benefit to memory</th>
+                <th scope="col">Strategies</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cudaOptimizationChecklist.map((item) => (
+                <tr key={item.optimization}>
+                  <th scope="row">
+                    <Link className="cuda-optimization-link" to={item.explanationPath}>
+                      {item.optimization}
+                    </Link>
+                  </th>
+                  <td>{item.computeBenefit}</td>
+                  <td>{item.memoryBenefit}</td>
+                  <td>
+                    <ul>
+                      {item.strategies.map((strategy) => (
+                        <li key={strategy}>{strategy}</li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Callout title="How to use the checklist" tone="success">
+          Pick the row that matches the profiler symptom, make one code change, then compare the
+          benchmark and Nsight metrics against the baseline before stacking another optimization.
+        </Callout>
       </Section>
 
       <Section
