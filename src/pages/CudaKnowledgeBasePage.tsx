@@ -95,6 +95,25 @@ export function CudaKnowledgeBasePage() {
         </article>
         <article className="cuda-kb-feature-link">
           <div>
+            <p>Modern CUDA C++ runtime</p>
+            <h3>CCCL Runtime, typed resources, and cuda::launch</h3>
+            <span>
+              Learn how the CUDA 13.2 runtime surface makes device and stream dependencies
+              explicit, manages buffers in stream order, and turns hierarchy plus launch options
+              into a composable C++ configuration.
+            </span>
+          </div>
+          <div className="cuda-kb-feature-actions">
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/cccl-runtime">
+              CCCL Runtime guide
+            </Link>
+            <Link className="cuda-kb-deep-link" to="/cuda-kb/execution-model#syntax">
+              Execution model
+            </Link>
+          </div>
+        </article>
+        <article className="cuda-kb-feature-link">
+          <div>
             <p>Occupancy deep page</p>
             <h3>Shared memory, resident blocks, and occupancy pressure</h3>
             <span>

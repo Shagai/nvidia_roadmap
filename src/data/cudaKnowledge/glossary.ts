@@ -26,6 +26,24 @@ export const cudaGlossary: CudaGlossaryItem[] = [
     explanationPath: "/cuda-kb/kernels#kernel-shape",
   },
   {
+    term: "CCCL Runtime",
+    meaning: "A modern C++ runtime surface in CUDA Core Compute Libraries for typed devices, streams, events, buffers, memory pools, data movement, and kernel launches.",
+    whenItMatters: "Useful when CUDA host code benefits from explicit dependencies, RAII ownership, stream-ordered APIs, exceptions, and incremental interoperability with native runtime handles.",
+    explanationPath: "/cuda-kb/cccl-runtime",
+  },
+  {
+    term: "cuda::launch",
+    meaning: "The CCCL Runtime operation that submits a kernel function or device-callable object to a stream with a typed kernel configuration.",
+    whenItMatters: "Replaces an unstructured launch parameter list with composable hierarchy and options, and can carry compile-time configuration information into device code.",
+    explanationPath: "/cuda-kb/cccl-runtime#launch",
+  },
+  {
+    term: "Kernel Configuration",
+    meaning: "A CCCL Runtime object that combines CUDA thread hierarchy dimensions—grid, optional cluster, and block—with options such as dynamic shared memory, cooperative launch, or launch priority.",
+    whenItMatters: "Lets compile-time dimensions, call-site choices, and overridable kernel defaults compose through one typed value; hard kernel requirements still need explicit validation.",
+    explanationPath: "/cuda-kb/cccl-runtime#configuration",
+  },
+  {
     term: "Grid",
     meaning: "The full set of blocks created by one kernel launch.",
     whenItMatters: "Defines total logical parallel work for a launch.",

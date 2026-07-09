@@ -100,6 +100,20 @@ export const cudaSources: CudaKnowledgeSource[] = [
     checked: "2026-05-10",
   },
   {
+    id: "cccl-runtime-blog",
+    label: "NVIDIA Technical Blog: CCCL Runtime",
+    url: "https://developer.nvidia.com/blog/cccl-runtime-a-modern-c-runtime-for-cuda/",
+    scope: "Design overview and end-to-end example for explicit devices, owning and borrowed resources, stream-ordered buffers, cuda::launch, interoperability, and exception-based errors.",
+    checked: "2026-07-09",
+  },
+  {
+    id: "cccl-runtime-launch",
+    label: "CCCL Runtime: Launch",
+    url: "https://nvidia.github.io/cccl/unstable/libcudacxx/runtime/launch.html#launch",
+    scope: "Unstable-track guide to cuda::launch, kernel_config, make_config, kernel callable forms, configuration composition, dynamic shared memory, cooperative launch, priority, and host_launch.",
+    checked: "2026-07-09",
+  },
+  {
     id: "cublas",
     label: "cuBLAS",
     url: "https://docs.nvidia.com/cuda/cublas/index.html",

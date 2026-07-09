@@ -1,6 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { SharedLayout } from "./components/SharedLayout";
+import { CudaCcclRuntimePage } from "./pages/CudaCcclRuntimePage";
 import { CudaExercisesPage } from "./pages/CudaExercisesPage";
 import { CudaKernelExamplesPage } from "./pages/CudaKernelExamplesPage";
 import { CudaKernelsPage } from "./pages/CudaKernelsPage";
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="knowledge" element={<KnowledgeIndexPage />} />
           <Route path="knowledge/:monthId" element={<MonthKnowledgePage />} />
           <Route path="cuda-kb" element={<CudaKnowledgeBasePage />} />
+          <Route path="cuda-kb/cccl-runtime" element={<CudaCcclRuntimePage />} />
           <Route path="cuda-kb/mental-model" element={<CudaMentalModelPage />} />
           <Route path="cuda-kb/mental-model/traps/:trapSlug" element={<CudaMentalModelTrapPage />} />
           <Route path="cuda-kb/kernels" element={<CudaKernelsPage />} />
