@@ -84,7 +84,7 @@ export function CudaSyncthreadsPage() {
             <p>Use a second kernel, atomics, cooperative groups, or a library primitive when blocks must combine results.</p>
           </article>
         </div>
-        <CodeBlock>{`// One barrier per block, not one barrier for the whole grid.
+        <CodeBlock language="cuda">{`// One barrier per block, not one barrier for the whole grid.
 myKernel<<<4, 256>>>();
 
 // In block 0:
@@ -105,7 +105,7 @@ __syncthreads(); // waits for block 1 threads only`}</CodeBlock>
           memory that another thread is supposed to write, a barrier is the point where the program
           says, "the write phase is complete; now the read phase can begin."
         </p>
-        <CodeBlock>{`__global__ void readNeighbor(const float* input, float* output, int n)
+        <CodeBlock language="cuda">{`__global__ void readNeighbor(const float* input, float* output, int n)
 {
     extern __shared__ float s[];
 
@@ -146,7 +146,7 @@ __syncthreads(); // waits for block 1 threads only`}</CodeBlock>
           seeing incomplete tile loads. The second barrier protects the tile storage from being
           overwritten while another thread is still reading it.
         </p>
-        <CodeBlock>{`for (int tile = 0; tile < numberOfTiles; ++tile)
+        <CodeBlock language="cuda">{`for (int tile = 0; tile < numberOfTiles; ++tile)
 {
     As[ty][tx] = loadAOrZero(...);
     Bs[ty][tx] = loadBOrZero(...);
@@ -177,7 +177,7 @@ __syncthreads(); // waits for block 1 threads only`}</CodeBlock>
           were produced by the previous stride. Without the barrier, a thread could read a value
           before the earlier addition has completed.
         </p>
-        <CodeBlock>{`for (int stride = blockDim.x / 2; stride > 0; stride /= 2)
+        <CodeBlock language="cuda">{`for (int stride = blockDim.x / 2; stride > 0; stride /= 2)
 {
     if (threadIdx.x < stride)
     {
@@ -220,7 +220,7 @@ __syncthreads(); // waits for block 1 threads only`}</CodeBlock>
             </p>
           </article>
         </div>
-        <CodeBlock>{`// Dangerous: only some threads reach the barrier.
+        <CodeBlock language="cuda">{`// Dangerous: only some threads reach the barrier.
 if (globalId < n)
 {
     s[threadIdx.x] = input[globalId];

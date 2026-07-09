@@ -176,7 +176,7 @@ export function ProfilingLabPage() {
             </article>
           ))}
         </div>
-        <CodeBlock>{`__constant__ float c_coeff[64];  // constant memory, grid-visible reads
+        <CodeBlock language="cuda" title="CUDA memory declarations">{`__constant__ float c_coeff[64];  // constant memory, grid-visible reads
 __device__ int g_counter;       // global memory, grid-visible state
 
 __global__ void kernel(float* data) {
@@ -226,7 +226,7 @@ __global__ void kernel(float* data) {
             </p>
           </div>
         </div>
-        <CodeBlock>{`computational_intensity = FLOPs / bytes_moved
+        <CodeBlock language="text" title="Roofline planning equations" wrap>{`computational_intensity = FLOPs / bytes_moved
 bandwidth_limit         = peak_bandwidth * computational_intensity
 roofline_limit          = min(peak_compute, bandwidth_limit)
 knee_intensity          = peak_compute / peak_bandwidth
@@ -259,7 +259,7 @@ intensity = 1.0 / 12.0; // about 0.083 FLOP/B, usually memory-bound`}</CodeBlock
           Record the timeline, the bottleneck, the hypothesis, the change, and the before/after
           number. That turns profiling into evidence instead of a screenshot collection.
         </Callout>
-        <CodeBlock>{`profiling loop:
+        <CodeBlock language="text" title="Profiling loop" wrap>{`profiling loop:
 1. Measure the whole pipeline.
 2. Find the dominant stage.
 3. Form one hypothesis.

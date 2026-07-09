@@ -47,6 +47,7 @@ export const knowledge202702: MonthKnowledge = {
         title: "Design document template",
         body:
           "Use the same structure for all five documents so practice compounds.",
+        codeLanguage: "text",
         code: `# Design
 ## Requirements
 ## Data model

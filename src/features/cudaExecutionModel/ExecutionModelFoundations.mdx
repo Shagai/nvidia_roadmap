@@ -50,7 +50,7 @@ arguments. The first value is the number of blocks in the grid. The second value
 number of threads in each block. The optional third value is dynamic shared memory bytes per
 block. The optional fourth value is the stream.
 
-<CodeBlock>{`kernel<<<gridDim, blockDim, dynamicSharedMemoryBytes, stream>>>(args...);
+<CodeBlock language="cuda" title="Launch syntax">{`kernel<<<gridDim, blockDim, dynamicSharedMemoryBytes, stream>>>(args...);
 
 vecAddKernel<<<ceil(n / 256.0), 256>>>(A_d, B_d, C_d, n);
 
@@ -110,7 +110,7 @@ For a simple vector kernel, each thread owns one output element. The host launch
 `n` logical threads. The kernel computes a global index and checks whether that index names a
 real element before touching memory.
 
-<CodeBlock>{`__global__ void vecAddKernel(const float* A,
+<CodeBlock language="cuda" showLineNumbers title="vec_add.cu">{`__global__ void vecAddKernel(const float* A,
                              const float* B,
                              float* C,
                              int n)
@@ -127,7 +127,7 @@ vecAddKernel<<<grid, block>>>(A_d, B_d, C_d, n);`}</CodeBlock>
 
 The useful accounting line is:
 
-<CodeBlock>{`useful elements   = n
+<CodeBlock language="text" title="Coverage ledger" wrap>{`useful elements   = n
 blocks launched   = (n + block - 1) / block
 threads launched  = blocks launched * block
 guard threads     = threads launched - n`}</CodeBlock>
@@ -247,7 +247,7 @@ CUDA exposes threads, but performance often becomes visible at warp granularity.
 block contributes 8 warps. A 128-thread block contributes 4 warps. A 1024-thread block
 contributes 32 warps and can leave fewer block-level scheduling choices on an SM.
 
-<CodeBlock>{`// First CUDA baseline for a 1D data-parallel kernel:
+<CodeBlock language="cuda" title="Baseline launch shapes">{`// First CUDA baseline for a 1D data-parallel kernel:
 int block = 256;
 int grid  = (n + block - 1) / block;
 kernel<<<grid, block>>>(...);

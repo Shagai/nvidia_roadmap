@@ -270,7 +270,7 @@ export function CudaKnowledgeBasePage() {
             </tbody>
           </table>
         </div>
-        <CodeBlock>{`# Minimum CUDA project evidence
+        <CodeBlock language="bash" title="Evidence commands">{`# Minimum CUDA project evidence
 nvidia-smi
 nvcc --version
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

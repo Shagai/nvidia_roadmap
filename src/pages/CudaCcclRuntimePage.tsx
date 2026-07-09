@@ -86,7 +86,7 @@ export function CudaCcclRuntimePage() {
           launch names its stream and configuration. The final synchronization is the explicit
           host boundary where the program needs the queued GPU work to be complete.
         </p>
-        <CodeBlock>{`#include <cuda/buffer>
+        <CodeBlock language="cuda" showLineNumbers title="cccl_vector_add.cu">{`#include <cuda/buffer>
 #include <cuda/devices>
 #include <cuda/launch>
 #include <cuda/memory_pool>
@@ -185,7 +185,7 @@ void run_vector_add()
             </p>
           </article>
         </div>
-        <CodeBlock>{`void submit_work(cuda::stream_ref stream);
+        <CodeBlock language="cuda">{`void submit_work(cuda::stream_ref stream);
 
 void bridge_existing_code(cudaStream_t native_stream)
 {
@@ -249,7 +249,7 @@ void bridge_existing_code(cudaStream_t native_stream)
           overwrites the allocation. The default device memory pool is the normal starting point;
           separate pools remain available when their settings need to differ.
         </p>
-        <CodeBlock>{`#include <exception>
+        <CodeBlock language="cuda">{`#include <exception>
 #include <iostream>
 
 int main() try
@@ -274,7 +274,7 @@ catch (const std::exception& error)
         title="The anatomy of cuda::launch"
         note="Read every call as three groups: the stream, the typed configuration, then the kernel and its arguments."
       >
-        <CodeBlock>{`cuda::launch(stream, config, kernel, arguments...);`}</CodeBlock>
+        <CodeBlock language="cuda">{`cuda::launch(stream, config, kernel, arguments...);`}</CodeBlock>
         <div className="kernel-sync-grid">
           <article>
             <h3>Where</h3>
@@ -304,7 +304,7 @@ catch (const std::exception& error)
           the signature asks for it. This is how compile-time information encoded at the host
           launch site becomes available to device code without passing the configuration twice.
         </p>
-        <CodeBlock>{`#include <cuda/launch>
+        <CodeBlock language="cuda">{`#include <cuda/launch>
 #include <cstdio>
 
 struct print_one_thread {
@@ -356,7 +356,7 @@ cuda::launch(stream, config, print_one_thread{}, 42);`}</CodeBlock>
             </tbody>
           </table>
         </div>
-        <CodeBlock>{`// Function template: instantiate it explicitly.
+        <CodeBlock language="cuda">{`// Function template: instantiate it explicitly.
 cuda::launch(stream, config, function_kernel<decltype(config)>, 42);
 
 // Functor: template parameters are deduced.
@@ -384,7 +384,7 @@ cuda::launch(stream, config, device_lambda, config, 42);`}</CodeBlock>
           <code> cuda::block_dims&lt;256&gt;()</code> puts the block size in the configuration type. The
           device can then use that static fact for specialization or compile-time validation.
         </p>
-        <CodeBlock>{`int blocks = choose_grid_size(problem_size);
+        <CodeBlock language="cuda">{`int blocks = choose_grid_size(problem_size);
 
 auto config = cuda::make_config(
     cuda::block_dims<256>(),
@@ -404,7 +404,7 @@ struct checked_kernel {
           dimension descriptors followed by options. In the direct form, all hierarchy dimensions
           must come before every launch option.
         </p>
-        <CodeBlock>{`auto base = cuda::make_config(
+        <CodeBlock language="cuda">{`auto base = cuda::make_config(
     cuda::block_dims<128>(),
     cuda::grid_dims(512),
     cuda::dynamic_shared_memory<float[]>(1024));
@@ -462,7 +462,7 @@ auto combined = cooperative.combine(base);`}</CodeBlock>
             </p>
           </article>
         </div>
-        <CodeBlock>{`template <class Config>
+        <CodeBlock language="cuda">{`template <class Config>
 __global__ void reduce_tile(Config config)
 {
     auto tile = cuda::dynamic_shared_memory(config);
@@ -490,7 +490,7 @@ cuda::launch(stream, config, reduce_tile<decltype(config)>);`}</CodeBlock>
           a host-callable object after earlier work in the stream, stores the callable and arguments
           by value for later execution, and normally needs a dynamic allocation for that storage.
         </p>
-        <CodeBlock>{`cuda::host_launch(stream, [](int batch) {
+        <CodeBlock language="cuda">{`cuda::host_launch(stream, [](int batch) {
     std::cout << "batch " << batch << " completed\\n";
 }, batch_id);
 

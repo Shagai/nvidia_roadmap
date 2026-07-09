@@ -20,6 +20,7 @@ export const knowledge202612: MonthKnowledge = {
         title: "Reproducer quality",
         body:
           "A good issue states environment, exact commands, expected behavior, actual behavior, logs, and a minimal input. It removes irrelevant complexity so maintainers can act.",
+        codeLanguage: "text",
         code: `Issue structure:
 Environment:
 Steps to reproduce:

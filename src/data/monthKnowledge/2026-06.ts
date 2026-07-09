@@ -28,6 +28,7 @@ export const knowledge202606: MonthKnowledge = {
           "Guard out-of-range threads.",
           "Choose block sizes such as 128 or 256 as reasonable starting points.",
         ],
+        codeLanguage: "cuda",
         code: `__global__ void grayscale(const uchar3* input, unsigned char* output, int n) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i >= n) return;
@@ -55,6 +56,7 @@ export const knowledge202606: MonthKnowledge = {
           "Record total launched threads as gridSize * blockSize.",
           "Explain guard threads as safety and launch-shape convenience, not wasted design by accident.",
         ],
+        codeLanguage: "cuda",
         code: `int blockSize = 256;
 int gridSize = (n + blockSize - 1) / blockSize;
 int totalLaunched = gridSize * blockSize;
@@ -80,6 +82,7 @@ grayscale<<<gridSize, blockSize>>>(input, output, n);`,
           "Check the launch error immediately after every kernel launch.",
           "Synchronize while learning and while measuring so asynchronous failures are not hidden.",
         ],
+        codeLanguage: "cuda",
         code: `blur<<<grid, block>>>(input, output, width, height);
 CUDA_CHECK(cudaGetLastError());
 CUDA_CHECK(cudaDeviceSynchronize());`,
@@ -130,6 +133,7 @@ CUDA_CHECK(cudaDeviceSynchronize());`,
         title: "Error macro",
         body:
           "Create a small macro or function that checks CUDA errors with file and line information. Use it around every CUDA API call and after every kernel launch.",
+        codeLanguage: "cuda",
         code: `inline void checkCuda(cudaError_t err, const char* file, int line) {
   if (err == cudaSuccess) return;
   throw std::runtime_error(

@@ -93,12 +93,12 @@ export function CudaKernelExamplesPage() {
         <div className="kernel-example-index-grid">
           <article>
             <h3>Output index</h3>
-            <CodeBlock>{`int i = blockIdx.x * blockDim.x + threadIdx.x;
+            <CodeBlock language="cuda" highlightLines={[2]} title="Output guard">{`int i = blockIdx.x * blockDim.x + threadIdx.x;
 if (i >= output_size) return;`}</CodeBlock>
           </article>
           <article>
             <h3>Private accumulation</h3>
-            <CodeBlock>{`float sum = 0.0f;
+            <CodeBlock language="cuda" title="Private accumulation">{`float sum = 0.0f;
 for (int j = 0; j < kernel_size; ++j) {
     sum += input[i + j] * kernel[j];
 }
@@ -120,7 +120,7 @@ output[i] = sum;`}</CodeBlock>
         title="Baseline CUDA kernel"
         note="This is the correctness-first version. It is the right first pass before optimizing memory traffic."
       >
-        <CodeBlock>{`__global__ void conv1d_valid_kernel(
+        <CodeBlock language="cuda" showLineNumbers title="conv1d_valid.cu">{`__global__ void conv1d_valid_kernel(
     const float* input,
     const float* kernel,
     float* output,
@@ -157,7 +157,7 @@ output[i] = sum;`}</CodeBlock>
           The challenge usually requires the <code>solve</code> signature to remain unchanged. Keep
           that wrapper stable and launch your implementation from inside it.
         </p>
-        <CodeBlock>{`void solve(
+        <CodeBlock language="cuda" showLineNumbers title="solve.cu">{`void solve(
     const float* input,
     const float* kernel,
     float* output,
@@ -196,7 +196,7 @@ output[i] = sum;`}</CodeBlock>
           needs only <code>256 + kernel_size - 1</code> input values. The optimized version below
           stages that input tile and the filter in dynamic shared memory.
         </p>
-        <CodeBlock>{`__global__ void conv1d_valid_shared_kernel(
+        <CodeBlock language="cuda" showLineNumbers title="conv1d_valid_shared.cu">{`__global__ void conv1d_valid_shared_kernel(
     const float* input,
     const float* kernel,
     float* output,
@@ -238,7 +238,7 @@ output[i] = sum;`}</CodeBlock>
         output[i] = sum;
     }
 }`}</CodeBlock>
-        <CodeBlock>{`void solve(
+        <CodeBlock language="cuda" showLineNumbers title="solve_shared.cu">{`void solve(
     const float* input,
     const float* kernel,
     float* output,
@@ -300,7 +300,7 @@ output[i] = sum;`}</CodeBlock>
             </tbody>
           </table>
         </div>
-        <CodeBlock>{`void conv1d_cpu(
+        <CodeBlock language="cpp" showLineNumbers title="conv1d_reference.cpp">{`void conv1d_cpu(
     const float* input,
     const float* kernel,
     float* output,

@@ -52,6 +52,7 @@ export const knowledge202608: MonthKnowledge = {
         title: "Sanitizer matrix",
         body:
           "Add build presets or targets for AddressSanitizer, UndefinedBehaviorSanitizer, and ThreadSanitizer where supported.",
+        codeLanguage: "bash",
         code: `cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_ASAN=ON
 cmake --build build-asan
 ctest --test-dir build-asan --output-on-failure`,

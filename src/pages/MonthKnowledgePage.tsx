@@ -141,7 +141,14 @@ function BlockList({ blocks }: { blocks: KnowledgeBlock[] }) {
               ))}
             </ul>
           ) : null}
-          {block.code ? <CodeBlock>{block.code}</CodeBlock> : null}
+          {block.code ? (
+            <CodeBlock
+              language={block.codeLanguage ?? "text"}
+              wrap={(block.codeLanguage ?? "text") === "text"}
+            >
+              {block.code}
+            </CodeBlock>
+          ) : null}
         </article>
       ))}
     </div>
@@ -163,7 +170,14 @@ function LabProjectList({ projects }: { projects: PracticalLabProject[] }) {
           <DetailList title="Deliver" items={project.deliverables} />
           <DetailList title="Done when" items={project.acceptanceCriteria} />
           {project.stretchGoals ? <DetailList title="Stretch" items={project.stretchGoals} /> : null}
-          {project.code ? <CodeBlock>{project.code}</CodeBlock> : null}
+          {project.code ? (
+            <CodeBlock
+              language={project.codeLanguage ?? "text"}
+              wrap={(project.codeLanguage ?? "text") === "text"}
+            >
+              {project.code}
+            </CodeBlock>
+          ) : null}
         </article>
       ))}
     </div>

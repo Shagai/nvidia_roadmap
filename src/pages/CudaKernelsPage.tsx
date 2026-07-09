@@ -77,7 +77,7 @@ export function CudaKernelsPage() {
           inside the tile, shared memory holds reusable input tiles, and a private register holds the
           accumulating sum.
         </p>
-        <CodeBlock>{`#define TILE 16
+        <CodeBlock language="cuda" showLineNumbers title="matmul_tiled.cu">{`#define TILE 16
 
 __global__ void matmulTiled(
     const float* A,
@@ -209,7 +209,7 @@ __global__ void matmulTiled(
             </p>
           </article>
         </div>
-        <CodeBlock>{`// Safe shape: all threads reach both barriers.
+        <CodeBlock language="cuda" title="Barrier-safe tile loop">{`// Safe shape: all threads reach both barriers.
 As[ty][tx] = inBoundsA ? A[row * K + aCol] : 0.0f;
 Bs[ty][tx] = inBoundsB ? B[bRow * N + col] : 0.0f;
 

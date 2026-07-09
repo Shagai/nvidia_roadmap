@@ -31,6 +31,7 @@ export const correctnessFirstDeepDive: CudaMentalModelTrapDeepDive = {
         paragraphs: [
           "The CPU reference is the contract. The naive CUDA kernel is the first GPU baseline. For vector addition, one thread owns one output element and uses a bounds guard.",
         ],
+        codeLanguage: "cpp",
         code: `void vector_add_cpu(const float* a, const float* b, float* c, int n)
 {
     for (int i = 0; i < n; ++i) {
@@ -54,6 +55,7 @@ __global__ void vector_add_gpu(const float* a,
         paragraphs: [
           "A correctness harness does not need to be elaborate at first. It needs to tell you where the first mismatch is and how large the difference is.",
         ],
+        codeLanguage: "cpp",
         code: `for (int i = 0; i < n; ++i) {
     float diff = std::abs(c_cpu[i] - c_gpu[i]);
     if (diff > 1e-5f) {
@@ -79,6 +81,7 @@ __global__ void vector_add_gpu(const float* a,
           "CPU and GPU results may not be bit-identical. This is especially true for reductions, matrix multiplication, and sums because floating-point addition is not associative.",
           "Do not usually compare floats with ==. Use an absolute and relative tolerance that matches the operation.",
         ],
+        codeLanguage: "cpp",
         code: `bool close(float x, float y)
 {
     float abs_err = std::abs(x - y);
@@ -90,6 +93,7 @@ __global__ void vector_add_gpu(const float* a,
       },
       {
         title: "Better development loop",
+        codeLanguage: "text",
         code: `CPU reference correct?
         |
         v

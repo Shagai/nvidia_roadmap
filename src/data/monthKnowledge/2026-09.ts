@@ -47,6 +47,7 @@ export const knowledge202609: MonthKnowledge = {
         title: "Pipeline timeline",
         body:
           "Create a table with preprocessing, H2D copy, inference, postprocessing, D2H copy if needed, and output time.",
+        codeLanguage: "text",
         code: `Frame N timing:
 decode_ms
 preprocess_ms

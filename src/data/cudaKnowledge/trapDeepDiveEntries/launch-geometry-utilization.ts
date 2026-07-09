@@ -20,6 +20,7 @@ export const launchGeometryUtilizationDeepDive: CudaMentalModelTrapDeepDive = {
           "The launch looks big enough, so it is assumed to use the GPU well. For example, a grid may contain many blocks and a block may contain 256 threads, but performance is still poor.",
           "The launch configuration answers how many logical threads exist. It does not answer whether those threads access memory efficiently, avoid divergence, use resources well, or keep SMs busy with useful work.",
         ],
+        codeLanguage: "cuda",
         code: `int block = 256;
 int grid = (n + block - 1) / block;
 kernel<<<grid, block>>>(...);
@@ -57,6 +58,7 @@ kernel<<<grid, block>>>(...);
         paragraphs: [
           "Use the launch calculation to make the kernel correct, then use timing and profiler metrics to explain performance.",
         ],
+        codeLanguage: "cuda",
         code: `// Coverage ledger:
 useful_elements  = n;
 threads_per_block = 256;

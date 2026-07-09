@@ -1,3 +1,5 @@
+import type { CodeLanguage } from "../../types";
+
 export type CudaKnowledgeSource = {
   id: string;
   label: string;
@@ -79,6 +81,7 @@ export type CudaMentalModelTrapDeepDiveSection = {
   paragraphs?: string[];
   bullets?: string[];
   code?: string;
+  codeLanguage?: CodeLanguage;
 };
 
 export type CudaMentalModelTrapDeepDive = {

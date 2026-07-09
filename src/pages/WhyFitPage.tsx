@@ -69,7 +69,7 @@ export function WhyFitPage() {
           The portfolio should be inspectable in five minutes: README, screenshots, benchmark table,
           architecture diagram, and reproducible build instructions.
         </p>
-        <CodeBlock>{`CV headline direction:
+        <CodeBlock language="text" title="CV headline direction" wrap>{`CV headline direction:
 C++ / CUDA / Robotics Software Engineer
 
 Signal to build:

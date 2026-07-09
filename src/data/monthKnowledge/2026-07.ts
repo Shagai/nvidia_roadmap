@@ -52,6 +52,7 @@ export const knowledge202607: MonthKnowledge = {
         title: "Performance write-up",
         body:
           "Write a short report: baseline, hypothesis, profiler evidence, optimization, result, and what still limits performance.",
+        codeLanguage: "text",
         code: `Performance note structure:
 1. Baseline timing and input size.
 2. Profiler observation.

@@ -14,6 +14,7 @@ export const unifiedMemoryDeepDive: CudaMentalModelTrapDeepDive = {
           "cudaMallocManaged gives you a pointer that can be used from both CPU code and GPU kernels. That makes ownership and porting simpler because the source code no longer needs separate host and device pointer names for the same logical allocation.",
           "The important point is that unified address space does not mean the data is physically everywhere for free. The CPU and GPU can see the same pointer, but the memory pages still have to be located in CPU RAM, GPU memory, or migrated between them.",
         ],
+        codeLanguage: "cuda",
         code: `float* x;
 cudaMallocManaged(&x, n * sizeof(float));
 
@@ -25,6 +26,7 @@ kernel<<<grid, block>>>(x); // GPU can touch it`,
         paragraphs: [
           "The wrong mental model is: since CPU and GPU can both access this pointer, I no longer need to think about data movement. CUDA still moves memory; it just may do it automatically and later than you expected.",
         ],
+        codeLanguage: "cuda",
         code: `cudaMallocManaged(&x, n * sizeof(float));
 
 for (int i = 0; i < n; ++i) {
@@ -50,6 +52,7 @@ std::cout << x[0] << "\\n";`,
           "The suspicious pattern is repeated alternation: CPU touches data, GPU touches data, CPU touches data, GPU touches data. The same pages can bounce between processors, which is page migration thrashing.",
           "Unified Memory also does not remove the need for synchronization. Kernel launches are asynchronous. If the CPU reads a value that the GPU is still writing, the shared pointer does not make that access legal.",
         ],
+        codeLanguage: "cuda",
         code: `kernel<<<blocks, threads>>>(x);
 cudaDeviceSynchronize(); // required before the CPU reads GPU-written data
 
@@ -61,6 +64,7 @@ std::cout << x[0] << "\\n";`,
           "Think of Unified Memory as: CUDA will help me manage movement, but movement still exists. Do not think: movement disappeared.",
           "Unified Memory is useful for prototyping, porting CPU code to CUDA, simplifying ownership, irregular data structures, and learning the algorithm first. For performance learning, compare it with explicit copies so the movement is visible.",
         ],
+        codeLanguage: "cuda",
         code: `// Unified Memory version:
 cudaMallocManaged(&x, bytes);
 kernel<<<grid, block>>>(x);

@@ -84,13 +84,13 @@ export function CudaSharedMemoryOccupancyPage() {
           resident threads. If a kernel uses 32 KiB of shared memory per block, shared memory alone
           allows only five such blocks to be resident on that SM.
         </p>
-        <CodeBlock>{`resident_blocks_by_smem = floor(shared_memory_per_sm / shared_memory_per_block)
+        <CodeBlock language="text" title="Occupancy estimate" wrap>{`resident_blocks_by_smem = floor(shared_memory_per_sm / shared_memory_per_block)
 resident_threads = resident_blocks * threads_per_block
 occupancy_estimate = resident_threads / max_resident_threads`}</CodeBlock>
         <p>
           With 256 threads per block, the estimate is:
         </p>
-        <CodeBlock>{`resident_blocks_by_smem = floor(164 KiB / 32 KiB) = 5
+        <CodeBlock language="text" title="Worked occupancy estimate" wrap>{`resident_blocks_by_smem = floor(164 KiB / 32 KiB) = 5
 resident_threads = 5 blocks * 256 threads/block = 1280
 occupancy_estimate = 1280 / 2048 = 62.5%`}</CodeBlock>
         <p>
@@ -109,7 +109,7 @@ occupancy_estimate = 1280 / 2048 = 62.5%`}</CodeBlock>
           A quick way to reason about shared-memory pressure is to divide the SM shared-memory
           budget by the maximum resident threads. For the A100-style numbers above:
         </p>
-        <CodeBlock>{`164 KiB / 2048 resident threads = 82 bytes/thread`}</CodeBlock>
+        <CodeBlock language="text" wrap>{`164 KiB / 2048 resident threads = 82 bytes/thread`}</CodeBlock>
         <p>
           That does not mean every thread owns 82 bytes. Shared memory belongs to the block. The
           average is a mental check: if a kernel needs far more shared memory per resident thread
@@ -126,13 +126,13 @@ occupancy_estimate = 1280 / 2048 = 62.5%`}</CodeBlock>
           In the common learning kernel, each block has <code>TILE_WIDTH * TILE_WIDTH</code> threads
           and stages two square tiles in shared memory:
         </p>
-        <CodeBlock>{`__shared__ float Mds[TILE_WIDTH][TILE_WIDTH];
+        <CodeBlock language="cuda">{`__shared__ float Mds[TILE_WIDTH][TILE_WIDTH];
 __shared__ float Nds[TILE_WIDTH][TILE_WIDTH];`}</CodeBlock>
         <p>
           Each tile has <code>TILE_WIDTH * TILE_WIDTH</code> floats, and each float is four bytes.
           Two tiles therefore cost:
         </p>
-        <CodeBlock>{`shared_memory_per_block = 2 * TILE_WIDTH * TILE_WIDTH * 4
+        <CodeBlock language="text" title="Tiled-kernel shared memory" wrap>{`shared_memory_per_block = 2 * TILE_WIDTH * TILE_WIDTH * 4
                         = 8 * TILE_WIDTH * TILE_WIDTH bytes
 
 threads_per_block = TILE_WIDTH * TILE_WIDTH
@@ -161,7 +161,7 @@ average_shared_memory_per_thread =
           Now compare a kernel with 256 threads per block and 32 KiB of shared memory per block. The
           average shared-memory pressure is:
         </p>
-        <CodeBlock>{`32 KiB / 256 threads = 128 bytes/thread`}</CodeBlock>
+        <CodeBlock language="text" wrap>{`32 KiB / 256 threads = 128 bytes/thread`}</CodeBlock>
         <p>
           Since 128 bytes/thread is higher than the 82 bytes/thread full-occupancy average, this
           kernel cannot reach full occupancy under the simplified A100-style budget. Fewer blocks
@@ -223,7 +223,7 @@ average_shared_memory_per_thread =
             "A conclusion that says whether shared memory improved reuse enough to justify its occupancy cost.",
           ]}
         />
-        <CodeBlock>{`# Useful evidence commands
+        <CodeBlock language="bash" title="Evidence commands">{`# Useful evidence commands
 nvcc --ptxas-options=-v ...
 ncu --set full --target-processes all ./build/cuda_lab`}</CodeBlock>
         <p className="month-nav">

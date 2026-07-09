@@ -1,8 +1,49 @@
 .code-block-wrap {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 28px rgba(0, 0, 0, 0.2);
   margin: 1rem 0;
   max-width: 100%;
   min-width: 0;
+  overflow: hidden;
   position: relative;
+}
+
+.code-block-toolbar {
+  align-items: center;
+  background: color-mix(in srgb, var(--code-bg), black 12%);
+  border-bottom: 1px solid var(--code-border);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.65rem 0.45rem 0.85rem;
+}
+
+.code-block-meta {
+  align-items: baseline;
+  display: flex;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.code-block-title {
+  color: var(--code-text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-block-language {
+  color: var(--code-comment);
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .copy-code-button {
@@ -10,12 +51,9 @@
   border: 1px solid rgba(248, 248, 242, 0.22);
   border-radius: 6px;
   color: var(--code-text);
+  flex: 0 0 auto;
   min-height: 1.9rem;
   padding: 0.25rem 0.6rem;
-  position: absolute;
-  right: 0.65rem;
-  top: 0.65rem;
-  z-index: 1;
 }
 
 .copy-code-button:hover {
@@ -24,10 +62,10 @@
 
 .code-block {
   background: var(--code-bg);
-  border: 1px solid var(--code-border);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 0;
   box-sizing: border-box;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 28px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   color: var(--code-text);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.92rem;
@@ -35,7 +73,7 @@
   margin: 0;
   max-width: 100%;
   overflow-x: auto;
-  padding: 3rem 1rem 1rem;
+  padding: 1rem;
   tab-size: 2;
   width: 100%;
 }
@@ -53,40 +91,113 @@
   white-space: pre;
 }
 
-.tok-comment {
+.code-block .token.comment,
+.code-block .token.prolog,
+.code-block .token.doctype,
+.code-block .token.cdata {
   color: var(--code-comment);
   font-style: italic;
 }
 
-.tok-keyword,
-.tok-preprocessor {
+.code-block .token.keyword,
+.code-block .token.operator,
+.code-block .token.atrule {
   color: var(--code-pink);
 }
 
-.tok-string {
+.code-block .token.string,
+.code-block .token.char,
+.code-block .token.regex,
+.code-block .token.inserted {
   color: var(--code-yellow);
 }
 
-.tok-number {
+.code-block .token.number,
+.code-block .token.boolean {
   color: var(--code-purple);
 }
 
-.tok-constant,
-.tok-type {
+.code-block .token.class-name,
+.code-block .token.builtin,
+.code-block .token.constant,
+.code-block .token.symbol {
   color: var(--code-blue);
-  font-style: italic;
 }
 
-.tok-operator {
-  color: var(--code-pink);
-}
-
-.tok-function {
+.code-block .token.function {
   color: var(--code-green);
 }
 
-.tok-preprocessor {
+.code-block .token.directive,
+.code-block .token.directive-hash,
+.code-block .token.macro,
+.code-block .token.macro-name,
+.code-block .token.property,
+.code-block .token.tag {
   color: var(--code-orange);
+}
+
+.code-block .token.deleted,
+.code-block .token.important {
+  color: var(--code-pink);
+  font-weight: 700;
+}
+
+.code-line--numbered {
+  display: grid;
+  grid-template-columns: 2.8rem minmax(max-content, 1fr);
+}
+
+.code-line--numbered::before {
+  border-right: 1px solid color-mix(in srgb, var(--code-border), transparent 22%);
+  color: var(--code-comment);
+  content: attr(data-line-number);
+  margin-right: 0.85rem;
+  padding-right: 0.75rem;
+  text-align: right;
+  user-select: none;
+}
+
+.code-line-content {
+  min-width: max-content;
+}
+
+.code-line--highlighted {
+  background: color-mix(in srgb, var(--code-blue), transparent 88%);
+  box-shadow: inset 3px 0 var(--code-blue);
+}
+
+.code-block--wrap code {
+  min-width: 0;
+}
+
+.code-block--wrap .code-line {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.code-block--wrap .code-line-content {
+  min-width: 0;
+}
+
+.code-block-status {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.code-block-copy-source {
+  height: 1px;
+  left: -10000px;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  width: 1px;
 }
 
 .interactive-panel {

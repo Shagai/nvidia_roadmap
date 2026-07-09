@@ -47,6 +47,7 @@ export const knowledge202704: MonthKnowledge = {
         title: "Explanation speed drill",
         body:
           "Answer each core CUDA/performance topic in 90 seconds, then again in 5 minutes with deeper tradeoffs.",
+        codeLanguage: "text",
         code: `90-second answer:
 1. Definition.
 2. Why it matters.

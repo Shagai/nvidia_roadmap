@@ -20,7 +20,7 @@ export function ExportPage() {
           skills, roadmap progress, diary, portfolio, theme, and version. Export JSON is the portable
           snapshot.
         </p>
-        <CodeBlock>{`nvidia-plan-skills
+        <CodeBlock language="text" title="Local storage keys" wrap>{`nvidia-plan-skills
 nvidia-plan-roadmap-progress
 nvidia-plan-diary
 nvidia-plan-portfolio

@@ -1,3 +1,5 @@
+export type CodeLanguage = "bash" | "cpp" | "cuda" | "text";
+
 export type MonthPlan = {
   id: string;
   month: string;
@@ -54,6 +56,7 @@ export type KnowledgeBlock = {
   body: string;
   checkpoints?: string[];
   code?: string;
+  codeLanguage?: CodeLanguage;
 };
 
 export type PracticalLabProject = {
@@ -66,6 +69,7 @@ export type PracticalLabProject = {
   acceptanceCriteria: string[];
   stretchGoals?: string[];
   code?: string;
+  codeLanguage?: CodeLanguage;
 };
 
 export type InterviewPromptAnswer = {

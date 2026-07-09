@@ -23,7 +23,7 @@ different resident warp.
 That is the core latency-tolerance model: a slow operation is still slow, but the SM may have
 other useful warp instructions to issue while that operation is pending.
 
-<CodeBlock>{`// Hardware-level mental model, not literal scheduler order:
+<CodeBlock language="text" title="Warp issue timeline" wrap>{`// Hardware-level mental model, not literal scheduler order:
 cycle 0: issue Warp 0 instruction
          Warp 0 loads from global memory and stalls
 
@@ -143,7 +143,7 @@ designed to make regular access patterns productive. When adjacent lanes read ad
 addresses, the hardware can form fewer, wider memory transactions. Those transactions are
 much easier to distribute across the memory system than scattered single-lane requests.
 
-<CodeBlock>{`// Good: neighboring lanes read neighboring addresses.
+<CodeBlock language="cuda" title="Memory access patterns">{`// Good: neighboring lanes read neighboring addresses.
 int i = blockIdx.x * blockDim.x + threadIdx.x;
 float x = A[i];
 
@@ -216,7 +216,7 @@ make that branch wrong, but it can make the warp run paths serially with differe
 lane masks. Loops follow the same rule: if the exit condition varies by lane, some lanes stop
 participating while the warp continues for lanes that still have work.
 
-<CodeBlock>{`// Diverges in the first warp: lanes 0, 1, and 2 disagree with lanes 3..31.
+<CodeBlock language="cuda" title="Branch behavior">{`// Diverges in the first warp: lanes 0, 1, and 2 disagree with lanes 3..31.
 if (threadIdx.x > 2) {
     do_taken_path();
 } else {
@@ -297,7 +297,7 @@ run. Resident blocks are limited by threads, warps, registers, shared memory, re
 slots, and architecture-specific limits. If no block fits, the launch fails. If only one
 block fits, the SM may have too few independent warps to hide latency.
 
-<CodeBlock>{`activeBlocksPerSM = min(
+<CodeBlock language="text" title="Occupancy accounting" wrap>{`activeBlocksPerSM = min(
     maxBlocksPerSM,
     maxThreadsPerSM / threadsPerBlock,
     maxWarpsPerSM / warpsPerBlock,

@@ -40,7 +40,7 @@ export function CudaMentalModelPage() {
           amortize movement, proves correctness against a CPU reference, and reports both kernel-only
           and end-to-end timing.
         </Callout>
-        <CodeBlock>{`// Mental-model sketch before writing a kernel
+        <CodeBlock language="text" title="CUDA planning checklist" wrap>{`// Mental-model sketch before writing a kernel
 CPU owns: input loading, validation, allocation, launch choice, errors, final integration
 GPU owns: repeated parallel operation over N elements
 Boundary: H2D bytes=?, D2H bytes=?, synchronization points=?

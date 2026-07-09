@@ -1,187 +1,193 @@
-import { Children, isValidElement, useState } from "react";
-import type { ReactElement, ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import type { CodeLanguage } from "../types";
+import { tokenClassName, tokenizeCode } from "./codeBlockHighlighter";
+import { childrenToCode, codeLanguageLabels } from "./codeBlockModel";
 
-const keywords = new Set([
-  "__global__",
-  "__shared__",
-  "__syncthreads",
-  "auto",
-  "bool",
-  "break",
-  "case",
-  "catch",
-  "class",
-  "concept",
-  "const",
-  "constexpr",
-  "continue",
-  "delete",
-  "dim3",
-  "do",
-  "double",
-  "else",
-  "false",
-  "float",
-  "for",
-  "if",
-  "int",
-  "namespace",
-  "new",
-  "noexcept",
-  "nullptr",
-  "private",
-  "protected",
-  "public",
-  "requires",
-  "return",
-  "static",
-  "static_cast",
-  "std",
-  "struct",
-  "switch",
-  "template",
-  "throw",
-  "true",
-  "try",
-  "typename",
-  "using",
-  "void",
-  "while",
-]);
+type CopyState = "copied" | "failed" | "idle" | "selected";
 
-const types = new Set([
-  "char",
-  "cudaError_t",
-  "size_t",
-  "uchar3",
-  "uint16_t",
-  "uint32_t",
-  "uint64_t",
-  "uint8_t",
-]);
-
-const tokenPattern =
-  /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\b[A-Za-z_][A-Za-z0-9_]*\b|\b\d+(?:\.\d+)?(?:f|u|ms)?\b|[{}()[\]<>;,.=+\-*/:&|!]+|\s+|.)/g;
-
-type CodeToken = {
-  text: string;
-  className?: string;
+export type CodeBlockProps = {
+  children: ReactNode;
+  highlightLines?: readonly number[];
+  language?: CodeLanguage;
+  showLineNumbers?: boolean;
+  title?: string;
+  wrap?: boolean;
 };
 
-export function CodeBlock({ children }: { children: ReactNode }) {
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
-  const code = childrenToCode(children);
+export function CodeBlock({
+  children,
+  highlightLines = [],
+  language = "text",
+  showLineNumbers = false,
+  title,
+  wrap = false,
+}: CodeBlockProps) {
+  const [copyState, setCopyState] = useState<CopyState>("idle");
+  const fallbackCopyRef = useRef<HTMLTextAreaElement>(null);
+  const mountedRef = useRef(true);
+  const resetTimerRef = useRef<number | null>(null);
+  const code = useMemo(() => childrenToCode(children), [children]);
+  const highlightedLineKey = highlightLines.join(",");
 
-  async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopyState("copied");
-    } catch {
-      setCopyState("failed");
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+      if (resetTimerRef.current !== null) {
+        window.clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  function scheduleStateReset() {
+    if (resetTimerRef.current !== null) {
+      window.clearTimeout(resetTimerRef.current);
     }
 
-    window.setTimeout(() => setCopyState("idle"), 1600);
+    resetTimerRef.current = window.setTimeout(() => {
+      setCopyState("idle");
+      resetTimerRef.current = null;
+    }, 1800);
   }
+
+  async function copyCode() {
+    let nextState: CopyState;
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API unavailable");
+      }
+
+      await navigator.clipboard.writeText(code);
+      nextState = "copied";
+    } catch {
+      nextState = selectFallbackSource(fallbackCopyRef.current) ? "selected" : "failed";
+    }
+
+    if (!mountedRef.current) {
+      return;
+    }
+
+    setCopyState(nextState);
+    scheduleStateReset();
+  }
+
+  const copyLabel = {
+    copied: "Copied",
+    failed: "Copy failed",
+    idle: "Copy",
+    selected: "Selected",
+  }[copyState];
+
+  const copyStatus = {
+    copied: "Code copied to the clipboard.",
+    failed: "Copy failed. Select the code and use your copy shortcut.",
+    idle: "",
+    selected: "Clipboard access is unavailable. The code is selected; use your copy shortcut.",
+  }[copyState];
 
   return (
     <div className="code-block-wrap">
-      <button className="copy-code-button" type="button" onClick={copyCode}>
-        {copyState === "copied" ? "Copied" : copyState === "failed" ? "Failed" : "Copy"}
-      </button>
-      <pre className="code-block">
+      <div className="code-block-toolbar">
+        <div className="code-block-meta">
+          {title ? <span className="code-block-title">{title}</span> : null}
+          <span className="code-block-language">{codeLanguageLabels[language]}</span>
+        </div>
+        <button
+          aria-label="Copy code"
+          className="copy-code-button"
+          type="button"
+          onClick={copyCode}
+        >
+          {copyLabel}
+        </button>
+      </div>
+      <span aria-live="polite" className="code-block-status" role="status">
+        {copyStatus}
+      </span>
+      <textarea
+        aria-hidden="true"
+        className="code-block-copy-source"
+        readOnly
+        ref={fallbackCopyRef}
+        tabIndex={-1}
+        value={code}
+      />
+      <pre className={`code-block${wrap ? " code-block--wrap" : ""}`}>
         <code>
-          {code.split("\n").map((line, lineIndex) => (
-            <span className="code-line" key={`${line}-${lineIndex}`}>
-              {tokenizeLine(line).map((token, tokenIndex) => (
-                <span className={token.className} key={`${token.text}-${tokenIndex}`}>
-                  {token.text}
-                </span>
-              ))}
-            </span>
-          ))}
+          <HighlightedCode
+            code={code}
+            highlightLinesKey={highlightedLineKey}
+            language={language}
+            showLineNumbers={showLineNumbers}
+          />
         </code>
       </pre>
     </div>
   );
 }
 
-function childrenToCode(children: ReactNode): string {
-  return Children.toArray(children)
-    .map((child) => {
-      if (typeof child === "string" || typeof child === "number") {
-        return String(child);
-      }
+const HighlightedCode = memo(function HighlightedCode({
+  code,
+  highlightLinesKey,
+  language,
+  showLineNumbers,
+}: {
+  code: string;
+  highlightLinesKey: string;
+  language: CodeLanguage;
+  showLineNumbers: boolean;
+}) {
+  const highlightedLines = useMemo(
+    () => new Set(highlightLinesKey.split(",").map(Number).filter(Number.isInteger)),
+    [highlightLinesKey],
+  );
+  const lines = useMemo(() => tokenizeCode(code, language), [code, language]);
 
-      if (isValidElement(child)) {
-        const element = child as ReactElement<{ children?: ReactNode }>;
-        return childrenToCode(element.props.children);
-      }
+  return (
+    <>
+      {lines.map((line, lineIndex) => {
+        const lineNumber = lineIndex + 1;
+        const lineClassName = [
+          "code-line",
+          showLineNumbers ? "code-line--numbered" : "",
+          highlightedLines.has(lineNumber) ? "code-line--highlighted" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
 
-      return "";
-    })
-    .join("");
-}
+        const renderedTokens = line.map((token, tokenIndex) => (
+          <span className={tokenClassName(token.types)} key={tokenIndex}>
+            {token.content}
+          </span>
+        ));
 
-function tokenizeLine(line: string): CodeToken[] {
-  const trimmed = line.trimStart();
-  if (trimmed.startsWith("//")) {
-    return [{ text: line, className: "tok-comment" }];
+        return (
+          <span
+            className={lineClassName}
+            data-line-number={showLineNumbers ? lineNumber : undefined}
+            key={lineIndex}
+          >
+            {showLineNumbers ? (
+              <span className="code-line-content">{renderedTokens}</span>
+            ) : (
+              renderedTokens
+            )}
+          </span>
+        );
+      })}
+    </>
+  );
+});
+
+function selectFallbackSource(source: HTMLTextAreaElement | null) {
+  if (!source) {
+    return false;
   }
 
-  if (trimmed.startsWith("#")) {
-    const leadingSpaces = line.slice(0, line.length - trimmed.length);
-    return [
-      { text: leadingSpaces },
-      { text: trimmed, className: "tok-preprocessor" },
-    ];
-  }
-
-  const commentIndex = line.indexOf("//");
-  const code = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
-  const comment = commentIndex >= 0 ? line.slice(commentIndex) : "";
-
-  const rawTokens = Array.from(code.matchAll(tokenPattern), ([match]) => match);
-  const tokens = rawTokens.map((match, index) => classifyToken(match, rawTokens, index));
-  if (comment) {
-    tokens.push({ text: comment, className: "tok-comment" });
-  }
-
-  return tokens.length > 0 ? tokens : [{ text: " " }];
-}
-
-function classifyToken(text: string, tokens: string[], index: number): CodeToken {
-  if (/^\s+$/.test(text)) {
-    return { text };
-  }
-  if (/^["']/.test(text)) {
-    return { text, className: "tok-string" };
-  }
-  if (/^\d/.test(text)) {
-    return { text, className: "tok-number" };
-  }
-  if (keywords.has(text)) {
-    return { text, className: "tok-keyword" };
-  }
-  if (types.has(text)) {
-    return { text, className: "tok-type" };
-  }
-  if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(text) && nextMeaningfulToken(tokens, index) === "(") {
-    return { text, className: "tok-function" };
-  }
-  if (/^[A-Z_]{2,}$/.test(text) || /^cuda[A-Z]/.test(text)) {
-    return { text, className: "tok-constant" };
-  }
-  if (/^[{}()[\]<>;,.=+\-*/:&|!]+$/.test(text)) {
-    return { text, className: "tok-operator" };
-  }
-  return { text };
-}
-
-function nextMeaningfulToken(tokens: string[], index: number) {
-  for (let i = index + 1; i < tokens.length; i += 1) {
-    if (!/^\s+$/.test(tokens[i])) {
-      return tokens[i];
-    }
-  }
-  return "";
+  source.focus({ preventScroll: true });
+  source.select();
+  return source.selectionStart === 0 && source.selectionEnd === source.value.length;
 }

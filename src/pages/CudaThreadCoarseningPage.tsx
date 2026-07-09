@@ -126,7 +126,7 @@ export function CudaThreadCoarseningPage() {
           thread owns. For a one-dimensional elementwise kernel, launch enough blocks to cover
           <code> blockDim.x * COARSEN</code> elements per block.
         </p>
-        <CodeBlock>{`template <int COARSEN>
+        <CodeBlock language="cuda" showLineNumbers title="coarsened_saxpy.cu">{`template <int COARSEN>
 __global__ void saxpyCoarsened(
     const float* __restrict__ x,
     float* __restrict__ y,
@@ -146,7 +146,7 @@ __global__ void saxpyCoarsened(
     }
 }`}
         </CodeBlock>
-        <CodeBlock>{`int blockSize = 256;
+        <CodeBlock language="cuda" title="Launch calculation">{`int blockSize = 256;
 int coarsen = 4;
 int blocks = (n + blockSize * coarsen - 1) / (blockSize * coarsen);
 
@@ -171,7 +171,7 @@ saxpyCoarsened<4><<<blocks, blockSize>>>(x, y, a, n);`}
           into a private register before sharing one partial result with the block. This reduces the
           number of values that need to enter the shared-memory reduction tree.
         </p>
-        <CodeBlock>{`template <int COARSEN>
+        <CodeBlock language="cuda" showLineNumbers title="coarsened_reduce.cu">{`template <int COARSEN>
 __global__ void reduceCoarsened(const float* input, float* blockSums, int n)
 {
     extern __shared__ float partial[];
@@ -267,7 +267,7 @@ __global__ void reduceCoarsened(const float* input, float* blockSums, int n)
             "Keep the smallest factor that gives a stable measured win.",
           ]}
         />
-        <CodeBlock>{`# Evidence commands
+        <CodeBlock language="bash" title="Evidence commands">{`# Evidence commands
 nvcc --ptxas-options=-v ...
 ncu --set full --target-processes all ./build/cuda_lab`}
         </CodeBlock>

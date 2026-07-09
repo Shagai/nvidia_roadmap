@@ -45,7 +45,14 @@ export function CudaMentalModelTrapPage() {
             <p key={paragraph}>{paragraph}</p>
           ))}
           {section.bullets ? <DetailList items={section.bullets} /> : null}
-          {section.code ? <CodeBlock>{section.code}</CodeBlock> : null}
+          {section.code ? (
+            <CodeBlock
+              language={section.codeLanguage ?? "text"}
+              wrap={(section.codeLanguage ?? "text") === "text"}
+            >
+              {section.code}
+            </CodeBlock>
+          ) : null}
         </Section>
       ))}
 

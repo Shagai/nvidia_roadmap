@@ -20,6 +20,7 @@ export const knowledge202703: MonthKnowledge = {
         title: "CV bullets",
         body:
           "Good bullets name the system, action, measurement, and technical tools. Avoid vague claims like worked on AI. Prefer implemented, profiled, optimized, measured, debugged, and shipped.",
+        codeLanguage: "text",
         code: `Implemented CUDA image-processing kernels and optimized memory access patterns,
 improving throughput by Xx over CPU baseline on N-sized inputs.`,
       },

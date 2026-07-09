@@ -11,7 +11,7 @@ export function ExerciseTile({ exercise }: { exercise: Exercise }) {
       <p className="exercise-question">{exercise.question}</p>
       {exercise.questionCode ? (
         <div className="exercise-question-code">
-          <CodeBlock>{exercise.questionCode}</CodeBlock>
+          <CodeBlock language="cuda">{exercise.questionCode}</CodeBlock>
         </div>
       ) : null}
       <div className="exercise-solution">
@@ -34,7 +34,7 @@ export function ExerciseTile({ exercise }: { exercise: Exercise }) {
             ))}
           </ul>
         ) : null}
-        {exercise.code ? <CodeBlock>{exercise.code}</CodeBlock> : null}
+        {exercise.code ? <CodeBlock language="cuda">{exercise.code}</CodeBlock> : null}
       </div>
     </article>
   );

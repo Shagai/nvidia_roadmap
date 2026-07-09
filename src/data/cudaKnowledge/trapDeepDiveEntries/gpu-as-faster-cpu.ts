@@ -14,6 +14,7 @@ export const gpuAsFasterCpuDeepDive: CudaMentalModelTrapDeepDive = {
           "The code technically launches a CUDA kernel, but the kernel behaves like a serial CPU function. One thread does most of the loop, or the host launches many tiny kernels that each do too little work.",
           "This can be seductive while learning because the kernel launch syntax appears correct. The problem is that the work ownership did not change. The GPU is being used as a remote scalar processor instead of a wide parallel device.",
         ],
+        codeLanguage: "cuda",
         code: `__global__ void serial_on_gpu(const float* a,
                               const float* b,
                               float* c,
@@ -43,6 +44,7 @@ export const gpuAsFasterCpuDeepDive: CudaMentalModelTrapDeepDive = {
         paragraphs: [
           "The first correction is to define what one CUDA thread owns. For a vector add, one thread owns one output element. For an image transform, one thread usually owns one output pixel. For a tiled matrix kernel, one block may own one output tile.",
         ],
+        codeLanguage: "cuda",
         code: `__global__ void vector_add_gpu(const float* a,
                                const float* b,
                                float* c,

@@ -47,6 +47,7 @@ export const knowledge202701: MonthKnowledge = {
         title: "Thread-safe queue",
         body:
           "Write a bounded blocking queue on a whiteboard. Include shutdown semantics and explain condition-variable predicates.",
+        codeLanguage: "cpp",
         code: `cv.wait(lock, [&] {
   return closed || !queue.empty();
 });`,

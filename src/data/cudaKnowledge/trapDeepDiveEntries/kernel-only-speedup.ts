@@ -14,6 +14,7 @@ export const kernelOnlySpeedupDeepDive: CudaMentalModelTrapDeepDive = {
           "A benchmark reports that the CUDA kernel is much faster than the CPU loop, but the measured number excludes host-to-device copies, device-to-host copies, allocation, synchronization, format conversion, and CPU-side setup.",
           "That kernel-only number is useful for device-code tuning. It is not the same as the speedup a user sees when running the whole application path.",
         ],
+        codeLanguage: "cuda",
         code: `// Narrow timing question: only the kernel body.
 start_cuda_event();
 kernel<<<grid, block>>>(d_input, d_output, n);
@@ -43,6 +44,7 @@ timer.stop();`,
         paragraphs: [
           "For learning, write the benchmark row so it cannot hide boundary costs. A simple table with separate stages prevents accidental overclaiming.",
         ],
+        codeLanguage: "text",
         code: `input       cpu_ms  h2d_ms  kernel_ms  d2h_ms  total_gpu_ms  speedup_e2e
 1080p       4.00    1.20    0.40       1.80    3.40          1.18x
 

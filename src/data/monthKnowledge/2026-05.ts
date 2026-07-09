@@ -52,6 +52,7 @@ export const knowledge202605: MonthKnowledge = {
         title: "Preparation log template",
         body:
           "Use a weekly Markdown template with sections for experiment, benchmark, confusion, reading, artifact, and next action.",
+        codeLanguage: "text",
         code: `# Week N
 
 ## Experiment

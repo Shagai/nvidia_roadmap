@@ -17,7 +17,7 @@ A grid-stride loop decouples total data size from the number of launched blocks.
 starts at its global thread id and advances by the total number of launched threads. This is
 useful when you want a controlled number of blocks while still covering very large inputs.
 
-<CodeBlock>{`__global__ void vecAddKernel(const float* A,
+<CodeBlock language="cuda">{`__global__ void vecAddKernel(const float* A,
                              const float* B,
                              float* C,
                              int n)
@@ -41,7 +41,7 @@ For row-major arrays, keep consecutive `threadIdx.x` lanes on consecutive memory
 when possible. The mapping below is boring on purpose: `x` comes from the fastest-changing
 thread index, and `idx = y * width + x` follows row-major layout.
 
-<CodeBlock>{`int x = blockIdx.x * blockDim.x + threadIdx.x;
+<CodeBlock language="cuda">{`int x = blockIdx.x * blockDim.x + threadIdx.x;
 int y = blockIdx.y * blockDim.y + threadIdx.y;
 int idx = y * width + x;
 
@@ -55,7 +55,7 @@ Kernels that declare `extern __shared__` receive the per-block allocation throug
 launch parameter. The value is bytes per block, not bytes for the whole grid. Large
 allocations above a default per-block limit can require an explicit function attribute.
 
-<CodeBlock>{`extern __shared__ float smem[];
+<CodeBlock language="cuda">{`extern __shared__ float smem[];
 
 int block = 256;
 int grid = (n + block * 2 - 1) / (block * 2);
@@ -69,7 +69,7 @@ CUDA can estimate a launch configuration that reaches high occupancy. Treat that
 candidate, not as the answer. Benchmark it against nearby block sizes and keep the measured
 winner.
 
-<CodeBlock>{`int minGridSize = 0;
+<CodeBlock language="cuda">{`int minGridSize = 0;
 int blockSize = 0;
 cudaOccupancyMaxPotentialBlockSize(
     &minGridSize,

@@ -90,7 +90,7 @@ export function InterviewPrepPage() {
             <li key={drill}>{drill}</li>
           ))}
         </ul>
-        <CodeBlock>{`mock loop:
+        <CodeBlock language="text" title="Mock interview loop" wrap>{`mock loop:
 4 C++ interviews
 4 algorithms interviews
 3 system design interviews

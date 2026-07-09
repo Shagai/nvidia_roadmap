@@ -77,7 +77,7 @@ export function CudaLabPage() {
       </Section>
 
       <Section id="code" title="Code shape">
-        <CodeBlock>{`dim3 block(threads_per_block);
+        <CodeBlock language="cuda">{`dim3 block(threads_per_block);
 dim3 grid((n + block.x - 1) / block.x);
 
 kernel<<<grid, block>>>(input, output, n);
