@@ -30,10 +30,11 @@ export function RoadmapTimeline() {
         </div>
       </div>
 
-      <div className="filter-row" role="list" aria-label="Roadmap filters">
+      <div className="filter-row" role="group" aria-label="Roadmap filters">
         {["All", ...filters].map((filter) => (
           <button
             key={filter}
+            aria-pressed={filter === activeFilter}
             className={filter === activeFilter ? "chip active" : "chip"}
             type="button"
             onClick={() => setActiveFilter(filter)}

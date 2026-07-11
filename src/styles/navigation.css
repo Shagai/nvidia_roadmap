@@ -1,3 +1,22 @@
+.skip-link {
+  background: var(--text);
+  border-radius: 0 0 0.5rem 0.5rem;
+  color: var(--panel);
+  font-weight: 700;
+  left: 1rem;
+  padding: 0.65rem 0.9rem;
+  position: fixed;
+  text-decoration: none;
+  top: 0;
+  transform: translateY(-150%);
+  transition: transform 0.15s ease;
+  z-index: 100;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 .topbar {
   align-items: center;
   background: color-mix(in srgb, var(--panel), transparent 5%);
@@ -76,4 +95,39 @@
 .theme-toggle {
   background: transparent;
   color: var(--text);
+}
+
+.route-loading {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  min-height: min(28rem, calc(100vh - 4rem));
+  padding: 2rem;
+}
+
+.route-loading-indicator {
+  animation: route-loading-spin 0.8s linear infinite;
+  border: 3px solid var(--accent-soft);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+@keyframes route-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+
+  .route-loading-indicator {
+    animation: none;
+  }
 }

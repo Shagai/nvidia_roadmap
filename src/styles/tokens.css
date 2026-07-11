@@ -5,9 +5,10 @@
   --muted: #65706f;
   --accent: #006d77;
   --accent-soft: #d6ece9;
+  --focus-ring: #006d77;
   --border: #d8d0c2;
   --panel: #fffdf8;
-  --warning: #b36b00;
+  --warning: #a05d00;
   --success: #2f7d4a;
   --danger: #b03a2e;
   --shadow: 0 18px 45px rgba(38, 34, 27, 0.08);
@@ -37,6 +38,7 @@
   --muted: #b5bbb6;
   --accent: #68d4cc;
   --accent-soft: #254947;
+  --focus-ring: #68d4cc;
   --border: #3a403b;
   --panel: #222620;
   --warning: #f2b35d;

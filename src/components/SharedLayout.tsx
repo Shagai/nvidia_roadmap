@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Suspense, useState } from "react";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useProgress } from "../state/ProgressContext";
 
 const navItems = [
@@ -23,13 +23,16 @@ export function SharedLayout() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <header className="topbar">
-        <a className="brand" href="/">
+        <Link className="brand" to="/">
           <span className="brand-mark" aria-hidden="true">
             NV
           </span>
           <span>Preparing for NVIDIA</span>
-        </a>
+        </Link>
         <button
           className="nav-toggle"
           type="button"
@@ -61,9 +64,20 @@ export function SharedLayout() {
           {theme === "light" ? "Dark" : "Light"}
         </button>
       </header>
-      <main>
-        <Outlet />
+      <main id="main-content" tabIndex={-1}>
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
+    </div>
+  );
+}
+
+function RouteLoadingFallback() {
+  return (
+    <div className="route-loading" role="status" aria-live="polite" aria-busy="true">
+      <span className="route-loading-indicator" aria-hidden="true" />
+      <span>Loading page…</span>
     </div>
   );
 }
