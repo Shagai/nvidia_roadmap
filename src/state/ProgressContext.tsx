@@ -6,8 +6,18 @@ import {
   useMemo,
   useState,
 } from "react";
-import { portfolioProjects, roadmap, skills, storageVersion } from "../data/learningPlan";
+import { storageVersion } from "../data/learningPlan";
 import type { DiaryEntry, ExportedProgress, PortfolioProgress, PortfolioStatus } from "../types";
+import {
+  makeDefaultDiary,
+  makeDefaultPortfolio,
+  makeDefaultSkills,
+  sanitizeDiary,
+  sanitizePortfolio,
+  sanitizeRoadmapProgress,
+  sanitizeSkills,
+  sanitizeTheme,
+} from "./progressData";
 
 const storageKeys = {
   skills: "nvidia-plan-skills",
@@ -17,14 +27,6 @@ const storageKeys = {
   theme: "nvidia-plan-theme",
   version: "nvidia-plan-version",
 } as const;
-
-const blankDiaryEntry: DiaryEntry = {
-  notes: "",
-  learned: "",
-  confused: "",
-  links: "",
-  nextActions: "",
-};
 
 type ProgressContextValue = {
   skillLevels: Record<string, number>;
@@ -46,82 +48,25 @@ type ProgressContextValue = {
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 
-function readJson<T>(key: string, fallback: T): T {
+function readJson(key: string, fallback: unknown): unknown {
   if (typeof window === "undefined") {
     return fallback;
   }
 
-  const raw = window.localStorage.getItem(key);
-  if (!raw) {
-    return fallback;
-  }
-
   try {
-    return JSON.parse(raw) as T;
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as unknown) : fallback;
   } catch {
     return fallback;
   }
 }
 
 function writeJson<T>(key: string, value: T) {
-  window.localStorage.setItem(key, JSON.stringify(value));
-}
-
-function makeDefaultSkills() {
-  return Object.fromEntries(skills.map((skill) => [skill.id, 0]));
-}
-
-function makeDefaultDiary() {
-  return Object.fromEntries(roadmap.map((month) => [month.id, blankDiaryEntry]));
-}
-
-function makeDefaultPortfolio() {
-  return Object.fromEntries(
-    portfolioProjects.map((project) => [
-      project.id,
-      {
-        status: "not-started" as PortfolioStatus,
-        checklist: Object.fromEntries(project.checklist.map((item) => [item, false])),
-        notes: "",
-      },
-    ]),
-  );
-}
-
-function sanitizeSkills(value: Record<string, number>) {
-  const defaults = makeDefaultSkills();
-  for (const skill of skills) {
-    const raw = Number(value[skill.id] ?? 0);
-    defaults[skill.id] = Number.isFinite(raw) ? Math.min(5, Math.max(0, raw)) : 0;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage can be unavailable in private browsing or when a quota is exhausted.
   }
-  return defaults;
-}
-
-function sanitizeDiary(value: Record<string, DiaryEntry>) {
-  const defaults = makeDefaultDiary();
-  for (const month of roadmap) {
-    defaults[month.id] = {
-      ...blankDiaryEntry,
-      ...(value[month.id] ?? {}),
-    };
-  }
-  return defaults;
-}
-
-function sanitizePortfolio(value: Record<string, PortfolioProgress>) {
-  const defaults = makeDefaultPortfolio();
-  for (const project of portfolioProjects) {
-    const existing = value[project.id];
-    defaults[project.id] = {
-      status: existing?.status ?? "not-started",
-      checklist: {
-        ...defaults[project.id].checklist,
-        ...(existing?.checklist ?? {}),
-      },
-      notes: existing?.notes ?? "",
-    };
-  }
-  return defaults;
 }
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
@@ -129,7 +74,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     sanitizeSkills(readJson(storageKeys.skills, makeDefaultSkills())),
   );
   const [roadmapProgress, setRoadmapProgress] = useState<Record<string, boolean>>(() =>
-    readJson(storageKeys.roadmap, {}),
+    sanitizeRoadmapProgress(readJson(storageKeys.roadmap, {})),
   );
   const [diary, setDiary] = useState<Record<string, DiaryEntry>>(() =>
     sanitizeDiary(readJson(storageKeys.diary, makeDefaultDiary())),
@@ -138,7 +83,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     sanitizePortfolio(readJson(storageKeys.portfolio, makeDefaultPortfolio())),
   );
   const [theme, setThemeState] = useState<"light" | "dark">(() =>
-    readJson(storageKeys.theme, "light"),
+    sanitizeTheme(readJson(storageKeys.theme, "light")),
   );
 
   useEffect(() => writeJson(storageKeys.skills, skillLevels), [skillLevels]);
@@ -147,7 +92,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   useEffect(() => writeJson(storageKeys.portfolio, portfolio), [portfolio]);
   useEffect(() => writeJson(storageKeys.theme, theme), [theme]);
   useEffect(() => {
-    window.localStorage.setItem(storageKeys.version, storageVersion);
+    try {
+      window.localStorage.setItem(storageKeys.version, storageVersion);
+    } catch {
+      // Keep the in-memory app usable even when localStorage is unavailable.
+    }
   }, []);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -207,11 +156,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         theme,
       }),
       importProgress: (payload) => {
-        setSkillLevels(sanitizeSkills(payload.skills ?? {}));
-        setRoadmapProgress(payload.roadmapProgress ?? {});
-        setDiary(sanitizeDiary(payload.diary ?? {}));
-        setPortfolio(sanitizePortfolio(payload.portfolio ?? {}));
-        setThemeState(payload.theme === "dark" ? "dark" : "light");
+        setSkillLevels(sanitizeSkills(payload.skills));
+        setRoadmapProgress(sanitizeRoadmapProgress(payload.roadmapProgress));
+        setDiary(sanitizeDiary(payload.diary));
+        setPortfolio(sanitizePortfolio(payload.portfolio));
+        setThemeState(sanitizeTheme(payload.theme));
       },
       resetProgress: () => {
         setSkillLevels(makeDefaultSkills());

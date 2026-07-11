@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { useProgress } from "../state/ProgressContext";
-import type { ExportedProgress } from "../types";
+import { parseProgressImport } from "../state/progressData";
 
 export function ExportImportPanel() {
   const { exportProgress, importProgress, resetProgress } = useProgress();
-  const [buffer, setBuffer] = useState("");
+  const [buffer, setBuffer] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const latestExport = useMemo(() => JSON.stringify(exportProgress(), null, 2), [exportProgress]);
 
@@ -26,8 +26,13 @@ export function ExportImportPanel() {
 
   function handleImport() {
     try {
-      const parsed = JSON.parse(buffer) as ExportedProgress;
-      importProgress(parsed);
+      const parsed = parseProgressImport(JSON.parse(buffer ?? latestExport) as unknown);
+      if (!parsed.ok) {
+        setMessage(parsed.message);
+        return;
+      }
+
+      importProgress(parsed.value);
       setMessage("Progress imported.");
     } catch {
       setMessage("Import failed. Paste valid exported JSON.");
@@ -37,7 +42,7 @@ export function ExportImportPanel() {
   function handleReset() {
     if (window.confirm("Reset all NVIDIA preparation progress stored in this browser?")) {
       resetProgress();
-      setBuffer("");
+      setBuffer(null);
       setMessage("Progress reset.");
     }
   }
@@ -69,7 +74,7 @@ export function ExportImportPanel() {
       <label className="stacked-field">
         Progress JSON
         <textarea
-          value={buffer || latestExport}
+          value={buffer ?? latestExport}
           onChange={(event) => setBuffer(event.target.value)}
           spellCheck={false}
         />

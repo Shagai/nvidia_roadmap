@@ -48,7 +48,12 @@ export function portfolioCompletion(portfolio: Record<string, PortfolioProgress>
 export function diaryCompletion(diary: Record<string, DiaryEntry>) {
   const monthsWithNotes = roadmap.filter((month) => {
     const entry = diary[month.id];
-    return entry && Object.values(entry).some((value) => value.trim().length > 0);
+    return (
+      entry &&
+      Object.values(entry).some(
+        (value) => typeof value === "string" && value.trim().length > 0,
+      )
+    );
   }).length;
 
   return {
