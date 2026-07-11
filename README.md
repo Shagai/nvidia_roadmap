@@ -32,17 +32,28 @@ npm run build
 npm run typecheck
 ```
 
+## Test and run all checks
+
+```bash
+npm test
+npm run check
+```
+
+`npm run check` runs the test suite, TypeScript validation, and the production build. Pull requests run the same command in GitHub Actions, and deployments run the tests before publishing.
+
 ## Project structure
 
 ```text
 src/
   App.tsx                         Router configuration
-  data/plan.ts                    Skills, roadmap, portfolio, interview content
+  data/learningPlan/              Skills, roadmap, portfolio, interview content
+  data/cudaKnowledge/             CUDA field-guide content and sources
   state/ProgressContext.tsx       Shared localStorage-backed progress state
+  state/progressData.ts           Runtime validation and progress-data defaults
   utils/progress.ts               Readiness and completion calculations
   components/                     Reusable essay layout and interactive figures
   pages/                          Routed pages
-  styles.css                      Distill-inspired responsive styling
+  styles/                         Distill-inspired responsive styling
 ```
 
 ## Pages
@@ -52,10 +63,18 @@ src/
 - `/knowledge` - Monthly knowledge base index
 - `/knowledge/:monthId` - Month-specific curriculum guide, for example `/knowledge/2026-06`
 - `/cuda-kb` - Central CUDA field guide with concepts, workflows, commands, glossary, and official sources
+- `/cuda-kb/cccl-runtime` - Modern CCCL runtime and `cuda::launch` guide
 - `/cuda-kb/mental-model` - Deep CUDA mental-model pillar with CPU/GPU boundary practice and traps
+- `/cuda-kb/kernels` - Kernel design and execution guide
+- `/cuda-kb/syncthreads` - Block synchronization deep dive
+- `/cuda-kb/shared-memory-occupancy` - Shared-memory and occupancy tradeoffs
+- `/cuda-kb/thread-coarsening` - Thread-coarsening guide
+- `/cuda-kb/execution-model` - CUDA launch and execution-model article
 - `/skill-map` - Interactive readiness skill map
 - `/roadmap` - May 2026 to April 2027 roadmap timeline
 - `/cuda-lab` - CUDA execution visualizer
+- `/cuda-lab/exercises` - Question-first CUDA exercise notebook
+- `/cuda-lab/kernel-examples` - Worked CUDA kernel examples
 - `/profiling-lab` - GPU pipeline latency simulator
 - `/portfolio` - Portfolio project board
 - `/diary` - Knowledge diary
